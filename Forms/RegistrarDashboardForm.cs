@@ -51,4 +51,49 @@ public partial class RegistrarDashboardForm : Form
     {
         Close();
     }
+
+    private void textBox1_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void maskedTextBox2_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void maskedTextBox3_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void button1_Click(object sender, EventArgs e)
+    {
+        Close();
+    }
+
+    private void maskedTextBox6_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void maskedTextBox8_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void maskedTextBox7_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+    {
+
+    }
+
+    private void pictureBox2_Click(object sender, EventArgs e)
+    {
+
+    }
 }
