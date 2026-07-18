@@ -12,15 +12,12 @@ partial class RegistrarDashboardForm
     private Panel panelHeader = null!;
 
     private PictureBox picLogo = null!;
-    private PictureBox picRefresh = null!;
     private PictureBox picExit = null!;
 
     private PictureBox picRegistration = null!;
     private PictureBox picDocuments = null!;
     private PictureBox picClearances = null!;
     private PictureBox picAcademic = null!;
-
-    private Button btnRefresh = null!;
     private Button btnExit = null!;
 
     private Label lblUniversity = null!;
@@ -51,15 +48,12 @@ partial class RegistrarDashboardForm
         btnDocuments = new Button();
         btnClearances = new Button();
         panelHeader = new Panel();
-        pictureBox1 = new PictureBox();
         picLogo = new PictureBox();
         lblUniversity = new Label();
         lblSeparator = new Label();
         lblRegistrar = new Label();
         lblWelcome = new Label();
         lblDateTime = new Label();
-        btnRefresh = new Button();
-        picRefresh = new PictureBox();
         btnExit = new Button();
         picExit = new PictureBox();
         lblRegistrationDescription = new Label();
@@ -70,15 +64,15 @@ partial class RegistrarDashboardForm
         picDocuments = new PictureBox();
         picClearances = new PictureBox();
         picAcademic = new PictureBox();
+        pictureBox2 = new PictureBox();
         panelHeader.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)picRefresh).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picExit).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picRegistration).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picDocuments).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picClearances).BeginInit();
         ((System.ComponentModel.ISupportInitialize)picAcademic).BeginInit();
+        ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
         SuspendLayout();
         // 
         // btnRegistration
@@ -148,33 +142,19 @@ partial class RegistrarDashboardForm
         // panelHeader
         // 
         panelHeader.BackColor = Color.FromArgb(152, 26, 32);
-        panelHeader.Controls.Add(pictureBox1);
+        panelHeader.Controls.Add(pictureBox2);
         panelHeader.Controls.Add(picLogo);
         panelHeader.Controls.Add(lblUniversity);
         panelHeader.Controls.Add(lblSeparator);
         panelHeader.Controls.Add(lblRegistrar);
         panelHeader.Controls.Add(lblWelcome);
         panelHeader.Controls.Add(lblDateTime);
-        panelHeader.Controls.Add(btnRefresh);
-        panelHeader.Controls.Add(picRefresh);
         panelHeader.Controls.Add(btnExit);
         panelHeader.Controls.Add(picExit);
         panelHeader.Location = new Point(0, 0);
         panelHeader.Name = "panelHeader";
         panelHeader.Size = new Size(890, 93);
         panelHeader.TabIndex = 4;
-        // 
-        // pictureBox1
-        // 
-        pictureBox1.BackColor = Color.White;
-        pictureBox1.Image = Properties.Resources.icons8_reload_50;
-        pictureBox1.Location = new Point(760, 54);
-        pictureBox1.Name = "pictureBox1";
-        pictureBox1.Size = new Size(23, 23);
-        pictureBox1.SizeMode = PictureBoxSizeMode.Zoom;
-        pictureBox1.TabIndex = 8;
-        pictureBox1.TabStop = false;
-        pictureBox1.Click += pictureBox1_Click;
         // 
         // picLogo
         // 
@@ -241,34 +221,11 @@ partial class RegistrarDashboardForm
         lblDateTime.TabIndex = 5;
         lblDateTime.Text = "Jul 18, 2026 | 06:00 PM";
         // 
-        // btnRefresh
-        // 
-        btnRefresh.BackColor = Color.White;
-        btnRefresh.FlatStyle = FlatStyle.Flat;
-        btnRefresh.Location = new Point(755, 52);
-        btnRefresh.Name = "btnRefresh";
-        btnRefresh.Size = new Size(33, 27);
-        btnRefresh.TabIndex = 4;
-        btnRefresh.UseVisualStyleBackColor = false;
-        btnRefresh.Click += btnRefresh_Click;
-        // 
-        // picRefresh
-        // 
-        picRefresh.BackColor = Color.White;
-        picRefresh.Image = Properties.Resources.icons8_reload_50;
-        picRefresh.Location = new Point(760, 55);
-        picRefresh.Name = "picRefresh";
-        picRefresh.Size = new Size(22, 22);
-        picRefresh.SizeMode = PictureBoxSizeMode.Zoom;
-        picRefresh.TabIndex = 6;
-        picRefresh.TabStop = false;
-        picRefresh.Click += btnRefresh_Click;
-        // 
         // btnExit
         // 
         btnExit.BackColor = Color.White;
         btnExit.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-        btnExit.Location = new Point(794, 52);
+        btnExit.Location = new Point(771, 56);
         btnExit.Name = "btnExit";
         btnExit.Size = new Size(83, 27);
         btnExit.TabIndex = 5;
@@ -371,6 +328,17 @@ partial class RegistrarDashboardForm
         picAcademic.TabIndex = 0;
         picAcademic.TabStop = false;
         // 
+        // pictureBox2
+        // 
+        pictureBox2.BackColor = Color.White;
+        pictureBox2.Image = Properties.Resources.icons8_exit_48;
+        pictureBox2.Location = new Point(775, 57);
+        pictureBox2.Name = "pictureBox2";
+        pictureBox2.Size = new Size(23, 23);
+        pictureBox2.SizeMode = PictureBoxSizeMode.Zoom;
+        pictureBox2.TabIndex = 9;
+        pictureBox2.TabStop = false;
+        // 
         // RegistrarDashboardForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -399,16 +367,15 @@ partial class RegistrarDashboardForm
         FormClosed += RegistrarDashboardForm_FormClosed;
         panelHeader.ResumeLayout(false);
         panelHeader.PerformLayout();
-        ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
         ((System.ComponentModel.ISupportInitialize)picLogo).EndInit();
-        ((System.ComponentModel.ISupportInitialize)picRefresh).EndInit();
         ((System.ComponentModel.ISupportInitialize)picExit).EndInit();
         ((System.ComponentModel.ISupportInitialize)picRegistration).EndInit();
         ((System.ComponentModel.ISupportInitialize)picDocuments).EndInit();
         ((System.ComponentModel.ISupportInitialize)picClearances).EndInit();
         ((System.ComponentModel.ISupportInitialize)picAcademic).EndInit();
+        ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
         ResumeLayout(false);
         PerformLayout();
     }
-    private PictureBox pictureBox1;
+    private PictureBox pictureBox2;
 }

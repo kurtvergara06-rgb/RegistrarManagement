@@ -1,6 +1,7 @@
 using RegistrarManagement.Helpers;
 using RegistrarManagement.Models;
 using RegistrarManagement.Services;
+using System.Drawing.Drawing2D;
 
 namespace RegistrarManagement.Forms;
 
@@ -18,6 +19,51 @@ public partial class StudentRegistrationForm : Form
     public StudentRegistrationForm()
     {
         InitializeComponent();
+
+        Color maroon =
+        Color.FromArgb(128, 0, 24);
+
+        Color red =
+            Color.FromArgb(220, 53, 69);
+
+        Color gray =
+            Color.FromArgb(180, 180, 180);
+
+        SetRoundedButton(
+            btnAdd,
+            10,
+            maroon
+        );
+
+        SetRoundedButton(
+            btnUpdate,
+            10,
+            gray
+        );
+
+        SetRoundedButton(
+            btnDelete,
+            10,
+            red
+        );
+
+        SetRoundedButton(
+            btnClear,
+            10,
+            maroon
+        );
+
+        SetRoundedButton(
+            btnRefresh,
+            10,
+            maroon
+        );
+
+        SetRoundedButton(
+            btnSearch,
+            8,
+            maroon
+        );
 
         // Program comes from the selected student's Firebase record.
         cmbProgram.Enabled = false;
@@ -281,6 +327,123 @@ public partial class StudentRegistrationForm : Form
                 return;
             }
         }
+    }
+
+    private GraphicsPath GetRoundedPath(
+    Rectangle rectangle,
+    int radius)
+    {
+        GraphicsPath path = new GraphicsPath();
+
+        int diameter = radius * 2;
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Y,
+            diameter,
+            diameter,
+            180,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Y,
+            diameter,
+            diameter,
+            270,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            0,
+            90
+        );
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            90,
+            90
+        );
+
+        path.CloseFigure();
+
+        return path;
+    }
+
+    private void SetRoundedButton(
+        Button button,
+        int radius,
+        Color borderColor)
+    {
+        button.FlatStyle = FlatStyle.Flat;
+
+        // Remove the normal square WinForms border.
+        button.FlatAppearance.BorderSize = 0;
+
+        void ApplyRegion()
+        {
+            Rectangle rectangle =
+                new Rectangle(
+                    0,
+                    0,
+                    button.Width,
+                    button.Height
+                );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            button.Region?.Dispose();
+            button.Region =
+                new Region(path);
+        }
+
+        button.Paint += (sender, e) =>
+        {
+            e.Graphics.SmoothingMode =
+                SmoothingMode.AntiAlias;
+
+            Rectangle rectangle =
+                new Rectangle(
+                    1,
+                    1,
+                    button.Width - 3,
+                    button.Height - 3
+                );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            using Pen pen =
+                new Pen(
+                    borderColor,
+                    1.5F
+                );
+
+            e.Graphics.DrawPath(
+                pen,
+                path
+            );
+        };
+
+        button.Resize +=
+            (sender, e) => ApplyRegion();
+
+        ApplyRegion();
     }
 
     private StudentRegistration BuildRegistration(
@@ -781,5 +944,12 @@ public partial class StudentRegistrationForm : Form
         {
             _isLoadingRecord = false;
         }
+    }
+
+    private void btnBack_Click(
+    object? sender,
+    EventArgs e)
+    {
+        Close();
     }
 }
