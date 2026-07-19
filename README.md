@@ -623,11 +623,41 @@ Consistent footer
 
 # Setup Instructions
 
-## 1. Clone or Download the Project
+You can set up the project either by **downloading the ZIP file** or by **cloning the repository using Git**.
 
-Open the project in Visual Studio.
+## Option A: Download as ZIP File
 
-## 2. Configure Firebase
+### 1. Download the Project
+
+Download the project repository as a ZIP file.
+
+### 2. Extract the ZIP File
+
+Right-click the downloaded ZIP file and select:
+
+```text
+Extract All
+````
+
+Open the extracted project folder.
+
+### 3. Open the Project in Visual Studio
+
+Inside the extracted folder, find the project file that ends with:
+
+```text
+.csproj
+```
+
+Example:
+
+```text
+RegistrarManagement.csproj
+```
+
+Double-click the `.csproj` file to open the project in Visual Studio.
+
+### 4. Configure Firebase
 
 Create or update:
 
@@ -637,24 +667,122 @@ firebase.env
 
 with the required Firebase configuration.
 
-Do not upload real Firebase secrets to a public repository.
+Make sure the Firebase Base URL and authentication settings are correct before running the system.
 
-## 3. Restore Dependencies
+Do not upload or commit real Firebase secrets to a public repository.
 
-Restore any required .NET dependencies.
+### 5. Restore Dependencies
 
-## 4. Build the Project
+Visual Studio will usually restore the required .NET dependencies automatically.
+
+If needed, restore the required packages through Visual Studio or NuGet Package Manager.
+
+### 6. Build the Project
+
+In Visual Studio, select:
 
 ```text
 Build
 → Build Solution
 ```
 
-## 5. Run the Application
+Make sure there are no build errors.
 
-Start the project from Visual Studio.
+### 7. Run the Application
+
+Click the Start button in Visual Studio or press:
+
+```text
+F5
+```
 
 ---
+
+## Option B: Clone the Project Using Git
+
+### 1. Clone the Repository
+
+Open Command Prompt, PowerShell, Git Bash, or the Visual Studio terminal.
+
+Run:
+
+```bash
+git clone <repository-url>
+```
+
+Example:
+
+```bash
+git clone https://github.com/username/repository-name.git
+```
+
+Replace the example URL with the actual GitHub repository URL.
+
+### 2. Open the Project Folder
+
+Go to the cloned project folder:
+
+```bash
+cd repository-name
+```
+
+### 3. Open the Project in Visual Studio
+
+Find the project file that ends with:
+
+```text
+.csproj
+```
+
+Example:
+
+```text
+RegistrarManagement.csproj
+```
+
+Double-click the `.csproj` file or open it directly in Visual Studio.
+
+### 4. Configure Firebase
+
+Create or update:
+
+```text
+firebase.env
+```
+
+with the required Firebase configuration.
+
+Do not commit Firebase authentication secrets or other sensitive credentials to GitHub.
+
+### 5. Restore Dependencies
+
+Visual Studio should restore the required .NET dependencies automatically.
+
+If dependencies are missing, restore them through Visual Studio or NuGet Package Manager.
+
+### 6. Build the Project
+
+In Visual Studio, select:
+
+```text
+Build
+→ Build Solution
+```
+
+### 7. Run the Application
+
+Click the Start button or press:
+
+```text
+F5
+```
+
+The Registrar Management System should now start.
+
+```
+
+Then click **Preview** first to make sure the formatting looks correct, and after that click **Commit changes...**.
+```
 
 # Important Notes
 
