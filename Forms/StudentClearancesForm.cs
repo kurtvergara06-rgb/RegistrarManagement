@@ -18,13 +18,18 @@ public partial class StudentClearancesForm : Form
 
         Load += Form_Load;
 
+        // Registrar Status is automatic.
         cmbRegistrarStatus.Items.AddRange(new[]
         {
             "Cleared",
             "Pending",
-            "Not Cleared"
+            "Not Cleared",
+            "No Record"
         });
 
+        cmbRegistrarStatus.Enabled = false;
+
+        // Accounting Status is automatic.
         cmbAccountingStatus.Items.AddRange(new[]
         {
             "Cleared",
@@ -34,28 +39,61 @@ public partial class StudentClearancesForm : Form
 
         cmbAccountingStatus.Enabled = false;
 
-        cmbRegistrarStatus.SelectedIndexChanged +=
-            cmbRegistrarStatus_SelectedIndexChanged;
-
+        // UI design
         Color maroon = Color.FromArgb(128, 0, 24);
         Color red = Color.FromArgb(220, 53, 69);
         Color gray = Color.FromArgb(180, 180, 180);
 
-        SetRoundedButton(btnCheckStatus, 8, maroon);
-        SetRoundedButton(btnAdd, 8, maroon);
-        SetRoundedButton(btnUpdate, 8, gray);
-        SetRoundedButton(btnDelete, 8, red);
-        SetRoundedButton(btnClear, 8, maroon);
-        SetRoundedButton(btnRefresh, 8, maroon);
-        SetRoundedButton(btnSearch, 8, maroon);
+        SetRoundedButton(
+            btnCheckStatus,
+            8,
+            maroon);
+
+        SetRoundedButton(
+            btnAdd,
+            8,
+            maroon);
+
+        SetRoundedButton(
+            btnUpdate,
+            8,
+            gray);
+
+        SetRoundedButton(
+            btnDelete,
+            8,
+            red);
+
+        SetRoundedButton(
+            btnClear,
+            8,
+            maroon);
+
+        SetRoundedButton(
+            btnRefresh,
+            8,
+            maroon);
+
+        SetRoundedButton(
+            btnSearch,
+            8,
+            maroon);
     }
 
-    private async void Form_Load(object? sender, EventArgs e)
+    // ==========================================
+    // FORM LOAD
+    // ==========================================
+
+    private async void Form_Load(
+        object? sender,
+        EventArgs e)
     {
         try
         {
             await LoadStudents();
+
             ConfigureGrid();
+
             await LoadGrid();
         }
         catch (Exception ex)
@@ -68,12 +106,17 @@ public partial class StudentClearancesForm : Form
         }
     }
 
+    // ==========================================
+    // LOAD STUDENTS
+    // ==========================================
+
     private async Task LoadStudents()
     {
         List<Student> students =
             await _students.GetAllAsync();
 
-        cmbStudent.DataSource = null;
+        cmbStudent.DataSource =
+            null;
 
         cmbStudent.DataSource =
             students
@@ -81,12 +124,17 @@ public partial class StudentClearancesForm : Form
                     x.Status.Equals(
                         "Active",
                         StringComparison.OrdinalIgnoreCase))
-                .OrderBy(x => x.FullName)
+                .OrderBy(x =>
+                    x.FullName)
                 .ToList();
 
         cmbStudent.DisplayMember =
             "FullName";
     }
+
+    // ==========================================
+    // CONFIGURE GRID
+    // ==========================================
 
     private void ConfigureGrid()
     {
@@ -168,6 +216,10 @@ public partial class StudentClearancesForm : Form
             });
     }
 
+    // ==========================================
+    // CHECK SHARED STATUS
+    // ==========================================
+
     private async void btnCheckStatus_Click(
         object? sender,
         EventArgs e)
@@ -186,6 +238,10 @@ public partial class StudentClearancesForm : Form
 
         try
         {
+            // --------------------------
+            // LIBRARY STATUS
+            // --------------------------
+
             var library =
                 await _service.GetLibraryAsync(
                     student.StudentId);
@@ -193,6 +249,10 @@ public partial class StudentClearancesForm : Form
             txtLibraryStatus.Text =
                 library?.LibraryStatus
                 ?? "No Record";
+
+            // --------------------------
+            // MEDICAL STATUS
+            // --------------------------
 
             var medical =
                 await _service.GetMedicalAsync(
@@ -202,13 +262,33 @@ public partial class StudentClearancesForm : Form
                 medical?.MedicalStatus
                 ?? "No Record";
 
+            // --------------------------
+            // REGISTRAR STATUS
+            // Automatically computed.
+            // --------------------------
+
+            string registrarStatus =
+                await _service.GetRegistrarStatusAsync(
+                    student.StudentId);
+
+            cmbRegistrarStatus.SelectedItem =
+                registrarStatus;
+
+            // --------------------------
+            // ACCOUNTING STATUS
+            // Automatically computed.
+            // --------------------------
+
             string accountingStatus =
-                await _service
-                    .GetAccountingStatusAsync(
-                        student.StudentId);
+                await _service.GetAccountingStatusAsync(
+                    student.StudentId);
 
             cmbAccountingStatus.SelectedItem =
                 accountingStatus;
+
+            // --------------------------
+            // OVERALL STATUS
+            // --------------------------
 
             UpdateOverallStatus();
         }
@@ -221,6 +301,10 @@ public partial class StudentClearancesForm : Form
                 MessageBoxIcon.Error);
         }
     }
+
+    // ==========================================
+    // BUILD CLEARANCE
+    // ==========================================
 
     private StudentClearance Build(
         string id)
@@ -266,6 +350,10 @@ public partial class StudentClearancesForm : Form
         return clearance;
     }
 
+    // ==========================================
+    // UPDATE OVERALL STATUS
+    // ==========================================
+
     private void UpdateOverallStatus()
     {
         StudentClearance clearance =
@@ -289,12 +377,9 @@ public partial class StudentClearancesForm : Form
                 clearance);
     }
 
-    private void cmbRegistrarStatus_SelectedIndexChanged(
-        object? sender,
-        EventArgs e)
-    {
-        UpdateOverallStatus();
-    }
+    // ==========================================
+    // ADD
+    // ==========================================
 
     private async void btnAdd_Click(
         object? sender,
@@ -304,7 +389,10 @@ public partial class StudentClearancesForm : Form
             is not Student student)
         {
             MessageBox.Show(
-                "Please select a student.");
+                "Please select a student.",
+                "Student Required",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
 
             return;
         }
@@ -314,49 +402,49 @@ public partial class StudentClearancesForm : Form
             string.IsNullOrWhiteSpace(
                 txtMedicalStatus.Text) ||
             string.IsNullOrWhiteSpace(
+                cmbRegistrarStatus.Text) ||
+            string.IsNullOrWhiteSpace(
                 cmbAccountingStatus.Text))
         {
             MessageBox.Show(
-                "Please click Check Shared Status first.");
-
-            return;
-        }
-
-        if (cmbRegistrarStatus.SelectedIndex
-            == -1)
-        {
-            MessageBox.Show(
-                "Please select Registrar Status.");
+                "Please click Check Shared Status first.",
+                "Check Status Required",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
 
             return;
         }
 
         try
         {
-            List<StudentClearance> existing =
+            List<StudentClearance> existingRecords =
                 await _service.GetAllAsync();
 
-            if (existing.Any(
-                    x =>
-                        x.StudentId
-                        == student.StudentId))
+            bool alreadyExists =
+                existingRecords.Any(x =>
+                    x.StudentId.Equals(
+                        student.StudentId,
+                        StringComparison.OrdinalIgnoreCase));
+
+            if (alreadyExists)
             {
                 MessageBox.Show(
-                    "Clearance record already exists.");
+                    "A clearance record already exists for this student.",
+                    "Duplicate Record",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
 
                 return;
             }
 
-            List<StudentClearance> existingRecords =
-            await _service.GetAllAsync();
+            string newId =
+                IdGenerator.CreateNext(
+                    "CLR",
+                    existingRecords.Select(
+                        x => x.ClearanceId));
 
             StudentClearance clearance =
-                        Build(
-                            IdGenerator.CreateNext(
-                                "CLR",
-                                existingRecords.Select(x => x.ClearanceId)
-                            )
-                        );
+                Build(newId);
 
             await _service.SaveAsync(
                 clearance);
@@ -366,17 +454,24 @@ public partial class StudentClearancesForm : Form
             Clear();
 
             MessageBox.Show(
-                "Clearance record added successfully.");
+                "Clearance record added successfully.",
+                "Success",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             MessageBox.Show(
-                ex.Message,
+                $"Failed to add clearance record.\n\n{ex.Message}",
                 "Add Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
+
+    // ==========================================
+    // UPDATE
+    // ==========================================
 
     private async void btnUpdate_Click(
         object? sender,
@@ -389,23 +484,33 @@ public partial class StudentClearancesForm : Form
 
         try
         {
+            StudentClearance clearance =
+                Build(_id);
+
             await _service.SaveAsync(
-                Build(_id));
+                clearance);
 
             await LoadGrid();
 
             MessageBox.Show(
-                "Clearance record updated successfully.");
+                "Clearance record updated successfully.",
+                "Success",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
         }
         catch (Exception ex)
         {
             MessageBox.Show(
-                ex.Message,
+                $"Failed to update clearance record.\n\n{ex.Message}",
                 "Update Error",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
     }
+
+    // ==========================================
+    // DELETE
+    // ==========================================
 
     private async void btnDelete_Click(
         object? sender,
@@ -418,24 +523,44 @@ public partial class StudentClearancesForm : Form
 
         DialogResult result =
             MessageBox.Show(
-                "Delete this clearance record?",
-                "Confirm",
+                "Are you sure you want to delete this clearance record?",
+                "Confirm Delete",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning);
 
-        if (result !=
-            DialogResult.Yes)
+        if (result != DialogResult.Yes)
         {
             return;
         }
 
-        await _service.DeleteAsync(
-            _id);
+        try
+        {
+            await _service.DeleteAsync(
+                _id);
 
-        await LoadGrid();
+            await LoadGrid();
 
-        Clear();
+            Clear();
+
+            MessageBox.Show(
+                "Clearance record deleted successfully.",
+                "Deleted",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Failed to delete clearance record.\n\n{ex.Message}",
+                "Delete Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
+
+    // ==========================================
+    // CLEAR
+    // ==========================================
 
     private void btnClear_Click(
         object? sender,
@@ -444,38 +569,83 @@ public partial class StudentClearancesForm : Form
         Clear();
     }
 
+    // ==========================================
+    // REFRESH
+    // ==========================================
+
     private async void btnRefresh_Click(
         object? sender,
         EventArgs e)
     {
-        await LoadStudents();
-        await LoadGrid();
+        try
+        {
+            await LoadStudents();
+
+            await LoadGrid();
+
+            Clear();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Failed to refresh records.\n\n{ex.Message}",
+                "Refresh Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
+
+    // ==========================================
+    // SEARCH
+    // ==========================================
 
     private async void btnSearch_Click(
         object? sender,
         EventArgs e)
     {
-        string search =
-            txtSearch.Text
-                .Trim()
-                .ToLowerInvariant();
+        try
+        {
+            string search =
+                txtSearch.Text
+                    .Trim()
+                    .ToLowerInvariant();
 
-        List<StudentClearance> records =
-            await _service.GetAllAsync();
+            List<StudentClearance> records =
+                await _service.GetAllAsync();
 
-        dgvClearances.DataSource =
-            records
-                .Where(x =>
-                    x.ClearanceId
-                        .ToLowerInvariant()
-                        .Contains(search)
-                    ||
-                    x.StudentId
-                        .ToLowerInvariant()
-                        .Contains(search))
-                .ToList();
+            if (string.IsNullOrWhiteSpace(search))
+            {
+                dgvClearances.DataSource =
+                    records;
+
+                return;
+            }
+
+            dgvClearances.DataSource =
+                records
+                    .Where(x =>
+                        x.ClearanceId
+                            .ToLowerInvariant()
+                            .Contains(search)
+                        ||
+                        x.StudentId
+                            .ToLowerInvariant()
+                            .Contains(search))
+                    .ToList();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                $"Search failed.\n\n{ex.Message}",
+                "Search Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
+
+    // ==========================================
+    // LOAD GRID
+    // ==========================================
 
     private async Task LoadGrid()
     {
@@ -485,6 +655,10 @@ public partial class StudentClearancesForm : Form
         dgvClearances.DataSource =
             await _service.GetAllAsync();
     }
+
+    // ==========================================
+    // GRID CLICK
+    // ==========================================
 
     private void dgvClearances_CellClick(
         object? sender,
@@ -537,6 +711,10 @@ public partial class StudentClearancesForm : Form
             true;
     }
 
+    // ==========================================
+    // SELECT STUDENT
+    // ==========================================
+
     private void SelectStudent(
         string studentId)
     {
@@ -556,6 +734,10 @@ public partial class StudentClearancesForm : Form
             }
         }
     }
+
+    // ==========================================
+    // RESET FORM
+    // ==========================================
 
     private void Clear()
     {
@@ -586,12 +768,20 @@ public partial class StudentClearancesForm : Form
             false;
     }
 
+    // ==========================================
+    // BACK
+    // ==========================================
+
     private void btnBack_Click(
         object? sender,
         EventArgs e)
     {
         Close();
     }
+
+    // ==========================================
+    // ROUNDED BUTTON DESIGN
+    // ==========================================
 
     private GraphicsPath GetRoundedPath(
         Rectangle rectangle,

@@ -7,7 +7,7 @@ public class ClearanceService
     private readonly FirebaseService _firebase = new();
 
     // ==========================================
-    // TEAM 4 - STUDENT CLEARANCE RECORDS
+    // GET ALL STUDENT CLEARANCE RECORDS
     // ==========================================
 
     public async Task<List<StudentClearance>> GetAllAsync()
@@ -19,18 +19,8 @@ public class ClearanceService
         return records.Values.ToList();
     }
 
-
     // ==========================================
     // LIBRARY STATUS
-    // ==========================================
-    // This assumes the Library Team will save:
-    //
-    // library_clearances
-    //    studentId
-    //       LibraryStatus
-    //
-    // We can adjust this later if their actual
-    // Firebase structure is different.
     // ==========================================
 
     public Task<LibraryClearance?> GetLibraryAsync(
@@ -41,21 +31,10 @@ public class ClearanceService
             studentId);
     }
 
-
     // ==========================================
     // MEDICAL STATUS
-    // ==========================================
-    // Your medical Firebase records are not
-    // directly keyed using StudentId.
-    //
-    // Example:
-    //
-    // medical
-    //    MR-0003
-    //       StudentId = 26-00001
-    //
-    // So we get all medical records and search
-    // for the matching StudentId.
+    // Reads records from the "medical" node
+    // and finds the matching StudentId.
     // ==========================================
 
     public async Task<MedicalClearance?> GetMedicalAsync(
@@ -72,36 +51,64 @@ public class ClearanceService
                     StringComparison.OrdinalIgnoreCase));
     }
 
+    // ==========================================
+    // REGISTRAR STATUS
+    // Automatically computed from
+    // student_registrations.
+    // ==========================================
+
+    public async Task<string> GetRegistrarStatusAsync(
+        string studentId)
+    {
+        var registrations =
+            await _firebase.GetAllAsync<StudentRegistration>(
+                "student_registrations");
+
+        StudentRegistration? registration =
+            registrations.Values
+                .Where(x =>
+                    x.StudentId.Equals(
+                        studentId,
+                        StringComparison.OrdinalIgnoreCase))
+                .OrderByDescending(x =>
+                    x.RegistrationDate)
+                .FirstOrDefault();
+
+        if (registration == null)
+        {
+            return "No Record";
+        }
+
+        return registration.RegistrationStatus switch
+        {
+            "Registered" => "Cleared",
+            "Pending" => "Pending",
+            "On Hold" => "Not Cleared",
+            "Cancelled" => "Not Cleared",
+            _ => "Pending"
+        };
+    }
 
     // ==========================================
-    // ACCOUNTING / TUITION BALANCE
-    // ==========================================
-    // Gets the student's balance from:
-    //
-    // enrollments
-    //    StudentId
-    //    TuitionFee
-    //       Balance
-    //
-    // null = No enrollment / tuition record
-    // 0    = Cleared
-    // > 0  = Not Cleared
+    // STUDENT TUITION BALANCE
+    // enrollments is stored as a JSON array.
     // ==========================================
 
     public async Task<decimal?> GetStudentBalanceAsync(
         string studentId)
     {
         var enrollments =
-    await _firebase.GetListAsync<EnrollmentClearanceData>(
-        "enrollments");
+            await _firebase.GetListAsync<EnrollmentClearanceData>(
+                "enrollments");
 
         EnrollmentClearanceData? enrollment =
             enrollments
-                        .Where(x =>
+                .Where(x =>
                     x.StudentId.Equals(
                         studentId,
                         StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(x => x.SchoolYear)
+                .OrderByDescending(x =>
+                    x.SchoolYear)
                 .FirstOrDefault();
 
         if (enrollment == null)
@@ -117,16 +124,16 @@ public class ClearanceService
         return enrollment.TuitionFee.Balance;
     }
 
-
     // ==========================================
-    // COMPUTE ACCOUNTING STATUS
+    // ACCOUNTING STATUS
     // ==========================================
 
     public async Task<string> GetAccountingStatusAsync(
         string studentId)
     {
         decimal? balance =
-            await GetStudentBalanceAsync(studentId);
+            await GetStudentBalanceAsync(
+                studentId);
 
         if (balance == null)
         {
@@ -141,7 +148,6 @@ public class ClearanceService
         return "Not Cleared";
     }
 
-
     // ==========================================
     // SAVE
     // ==========================================
@@ -155,7 +161,6 @@ public class ClearanceService
             item);
     }
 
-
     // ==========================================
     // DELETE
     // ==========================================
@@ -168,18 +173,8 @@ public class ClearanceService
             id);
     }
 
-
     // ==========================================
-    // OVERALL CLEARANCE STATUS
-    // ==========================================
-    //
-    // Uses only:
-    // 1. Library
-    // 2. Medical
-    // 3. Registrar
-    // 4. Accounting
-    //
-    // Guidance has been removed.
+    // OVERALL STATUS
     // ==========================================
 
     public static string Overall(
@@ -193,8 +188,6 @@ public class ClearanceService
             clearance.AccountingStatus
         };
 
-        // If any department explicitly says
-        // Not Cleared, overall is Not Cleared.
         if (statuses.Any(status =>
                 status.Equals(
                     "Not Cleared",
@@ -203,8 +196,6 @@ public class ClearanceService
             return "Not Cleared";
         }
 
-        // Missing data or no shared record yet
-        // means clearance is still pending.
         if (statuses.Any(status =>
                 string.IsNullOrWhiteSpace(status) ||
                 status.Equals(
@@ -212,12 +203,14 @@ public class ClearanceService
                     StringComparison.OrdinalIgnoreCase) ||
                 status.Equals(
                     "No Record",
+                    StringComparison.OrdinalIgnoreCase) ||
+                status.Equals(
+                    "Ongoing",
                     StringComparison.OrdinalIgnoreCase)))
         {
             return "Pending";
         }
 
-        // All four departments must be Cleared.
         if (statuses.All(status =>
                 status.Equals(
                     "Cleared",
@@ -229,11 +222,8 @@ public class ClearanceService
         return "Pending";
     }
 
-
     // ==========================================
-    // INTERNAL ENROLLMENT DATA MODELS
-    // Used only for reading shared enrollment
-    // data for Accounting Status.
+    // INTERNAL ENROLLMENT MODELS
     // ==========================================
 
     private class EnrollmentClearanceData
@@ -248,7 +238,6 @@ public class ClearanceService
 
         public TuitionFeeData? TuitionFee { get; set; }
     }
-
 
     private class TuitionFeeData
     {
