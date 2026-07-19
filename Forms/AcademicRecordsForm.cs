@@ -577,15 +577,16 @@ public partial class AcademicRecordsForm : Form
                 return;
             }
 
+            List<AcademicRecord> existingRecords =
+              await _service.GetAllAsync();
+
             AcademicRecord record =
                 BuildRecord(
-                    IdGenerator.Create("AR")
+                    IdGenerator.CreateNext(
+                        "AR",
+                        existingRecords.Select(x => x.RecordId)
+                    )
                 );
-
-            List<AcademicRecord>
-                existingRecords =
-                    await _service
-                        .GetAllAsync();
 
             bool duplicate =
                 existingRecords.Any(

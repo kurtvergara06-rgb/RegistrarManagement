@@ -347,9 +347,15 @@ public partial class DocumentRequestsForm : Form
                 return;
             }
 
+            List<DocumentRequest> existingRecords =
+                await _service.GetAllAsync();
+
             DocumentRequest request =
                 BuildRequest(
-                    IdGenerator.Create("REQ")
+                    IdGenerator.CreateNext(
+                        "REQ",
+                        existingRecords.Select(x => x.RequestId)
+                    )
                 );
 
             await _service.SaveAsync(

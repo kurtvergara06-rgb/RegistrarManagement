@@ -514,13 +514,16 @@ public partial class StudentRegistrationForm : Form
                 return;
             }
 
-            StudentRegistration registration =
-                BuildRegistration(
-                    IdGenerator.Create("REG")
-                );
-
             List<StudentRegistration> existingRecords =
                 await _service.GetAllAsync();
+
+                        StudentRegistration registration =
+                            BuildRegistration(
+                                IdGenerator.CreateNext(
+                                    "REG",
+                                    existingRecords.Select(x => x.RegistrationId)
+                                )
+                            );
 
             bool duplicate = existingRecords.Any(record =>
                 record.StudentId ==

@@ -347,10 +347,16 @@ public partial class StudentClearancesForm : Form
                 return;
             }
 
+            List<StudentClearance> existingRecords =
+            await _service.GetAllAsync();
+
             StudentClearance clearance =
-                Build(
-                    IdGenerator.Create(
-                        "CLR"));
+                        Build(
+                            IdGenerator.CreateNext(
+                                "CLR",
+                                existingRecords.Select(x => x.ClearanceId)
+                            )
+                        );
 
             await _service.SaveAsync(
                 clearance);

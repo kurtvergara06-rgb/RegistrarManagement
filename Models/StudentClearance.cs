@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace RegistrarManagement.Models;
 
 public class StudentClearance
@@ -13,6 +11,8 @@ public class StudentClearance
     public string MedicalStatus { get; set; } = "";
 
     public string RegistrarStatus { get; set; } = "";
+
+    public string AccountingStatus { get; set; } = "";
 
     public string OverallStatus { get; set; } = "";
 
