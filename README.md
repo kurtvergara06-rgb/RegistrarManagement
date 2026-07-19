@@ -894,8 +894,8 @@ Student Clearances
 **Team 4 - Registrar Management**
 
 ```text
-Member 1
-Member 2
+Kurt Allen L. Vergara
+Rafael Luis C. Nabong
 Member 3
 Member 4
 ```
