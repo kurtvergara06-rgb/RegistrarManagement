@@ -4,8 +4,9 @@ namespace RegistrarManagement.Models;
 
 public class LibraryClearance
 {
-    [JsonPropertyName("studentId")] public string StudentId { get; set; } = string.Empty;
-    [JsonPropertyName("libraryStatus")] public string LibraryStatus { get; set; } = string.Empty;
-    [JsonPropertyName("remarks")] public string Remarks { get; set; } = string.Empty;
-    [JsonPropertyName("updatedAt")] public string UpdatedAt { get; set; } = string.Empty;
+    [JsonPropertyName("Status")]
+    public string LibraryStatus { get; set; } = string.Empty;
+
+    [JsonPropertyName("LastChecked")]
+    public string LastChecked { get; set; } = string.Empty;
 }
