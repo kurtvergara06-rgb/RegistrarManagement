@@ -4,8 +4,18 @@ namespace RegistrarManagement.Models;
 
 public class MedicalClearance
 {
-    [JsonPropertyName("studentId")] public string StudentId { get; set; } = string.Empty;
-    [JsonPropertyName("medicalStatus")] public string MedicalStatus { get; set; } = string.Empty;
-    [JsonPropertyName("remarks")] public string Remarks { get; set; } = string.Empty;
-    [JsonPropertyName("updatedAt")] public string UpdatedAt { get; set; } = string.Empty;
+    [JsonPropertyName("StudentId")]
+    public string StudentId { get; set; } = string.Empty;
+
+    [JsonPropertyName("Status")]
+    public string MedicalStatus { get; set; } = string.Empty;
+
+    [JsonPropertyName("Remarks")]
+    public string Remarks { get; set; } = string.Empty;
+
+    [JsonPropertyName("Purpose")]
+    public string Purpose { get; set; } = string.Empty;
+
+    [JsonPropertyName("Date")]
+    public string Date { get; set; } = string.Empty;
 }

@@ -4,7 +4,13 @@ partial class StudentClearancesForm
 {
     private System.ComponentModel.IContainer? components = null;
 
+    private Panel pnlHeader = null!;
+    private PictureBox picLogo = null!;
+    private Button btnBack = null!;
     private Label lblTitle = null!;
+    private Label lblSubtitle = null!;
+
+    private Panel pnlFormCard = null!;
 
     private Label lblStudent = null!;
     private ComboBox cmbStudent = null!;
@@ -22,9 +28,6 @@ partial class StudentClearancesForm
     private Label lblAccountingStatus = null!;
     private ComboBox cmbAccountingStatus = null!;
 
-    private Label lblGuidanceStatus = null!;
-    private ComboBox cmbGuidanceStatus = null!;
-
     private Label lblOverallStatus = null!;
     private TextBox txtOverallStatus = null!;
 
@@ -37,11 +40,15 @@ partial class StudentClearancesForm
     private Button btnClear = null!;
     private Button btnRefresh = null!;
 
+    private Panel pnlSearch = null!;
     private Label lblSearch = null!;
     private TextBox txtSearch = null!;
     private Button btnSearch = null!;
 
     private DataGridView dgvClearances = null!;
+
+    private Panel pnlFooter = null!;
+    private Label lblFooter = null!;
 
     protected override void Dispose(bool disposing)
     {
@@ -55,348 +62,644 @@ partial class StudentClearancesForm
 
     private void InitializeComponent()
     {
-        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+        DataGridViewCellStyle headerStyle = new DataGridViewCellStyle();
+        DataGridViewCellStyle cellStyle = new DataGridViewCellStyle();
+
+        pnlHeader = new Panel();
+        picLogo = new PictureBox();
+        btnBack = new Button();
         lblTitle = new Label();
+        lblSubtitle = new Label();
+
+        pnlFormCard = new Panel();
+
         lblStudent = new Label();
         cmbStudent = new ComboBox();
         btnCheckStatus = new Button();
+
         lblLibraryStatus = new Label();
         txtLibraryStatus = new TextBox();
+
         lblMedicalStatus = new Label();
         txtMedicalStatus = new TextBox();
+
         lblRegistrarStatus = new Label();
         cmbRegistrarStatus = new ComboBox();
+
         lblAccountingStatus = new Label();
         cmbAccountingStatus = new ComboBox();
-        lblGuidanceStatus = new Label();
-        cmbGuidanceStatus = new ComboBox();
+
         lblOverallStatus = new Label();
         txtOverallStatus = new TextBox();
+
         lblRemarks = new Label();
         txtRemarks = new TextBox();
+
         btnAdd = new Button();
         btnUpdate = new Button();
         btnDelete = new Button();
         btnClear = new Button();
         btnRefresh = new Button();
+
+        pnlSearch = new Panel();
         lblSearch = new Label();
         txtSearch = new TextBox();
         btnSearch = new Button();
+
         dgvClearances = new DataGridView();
+
+        pnlFooter = new Panel();
+        lblFooter = new Label();
+
+        pnlHeader.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
+        pnlFormCard.SuspendLayout();
+        pnlSearch.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)dgvClearances).BeginInit();
+        pnlFooter.SuspendLayout();
+
         SuspendLayout();
-        // 
+
+        // =========================================
+        // pnlHeader
+        // =========================================
+        pnlHeader.BackColor = Color.FromArgb(128, 0, 24);
+        pnlHeader.Controls.Add(picLogo);
+        pnlHeader.Controls.Add(btnBack);
+        pnlHeader.Controls.Add(lblTitle);
+        pnlHeader.Controls.Add(lblSubtitle);
+        pnlHeader.Dock = DockStyle.Top;
+        pnlHeader.Location = new Point(0, 0);
+        pnlHeader.Name = "pnlHeader";
+        pnlHeader.Size = new Size(1280, 100);
+        pnlHeader.TabIndex = 0;
+
+        // =========================================
+        // picLogo
+        // =========================================
+        picLogo.BackColor = Color.Transparent;
+        picLogo.Image = Properties.Resources.BatStateU_NEU_Logo_removebg_preview;
+        picLogo.Location = new Point(64, 15);
+        picLogo.Name = "picLogo";
+        picLogo.Size = new Size(70, 70);
+        picLogo.SizeMode = PictureBoxSizeMode.Zoom;
+        picLogo.TabStop = false;
+
+        // =========================================
+        // btnBack
+        // =========================================
+        btnBack.BackColor = Color.FromArgb(128, 0, 24);
+        btnBack.Cursor = Cursors.Hand;
+        btnBack.FlatAppearance.BorderSize = 0;
+        btnBack.FlatStyle = FlatStyle.Flat;
+        btnBack.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+        btnBack.ForeColor = Color.White;
+        btnBack.Location = new Point(14, 28);
+        btnBack.Name = "btnBack";
+        btnBack.Size = new Size(42, 42);
+        btnBack.TabIndex = 0;
+        btnBack.Text = "<";
+        btnBack.UseVisualStyleBackColor = false;
+        btnBack.Click += btnBack_Click;
+
+        // =========================================
         // lblTitle
-        // 
+        // =========================================
         lblTitle.AutoSize = true;
-        lblTitle.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
-        lblTitle.Location = new Point(25, 18);
+        lblTitle.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
+        lblTitle.ForeColor = Color.White;
+        lblTitle.Location = new Point(150, 18);
         lblTitle.Name = "lblTitle";
-        lblTitle.Size = new Size(231, 32);
-        lblTitle.TabIndex = 0;
+        lblTitle.Size = new Size(283, 37);
+        lblTitle.TabIndex = 1;
         lblTitle.Text = "Student Clearances";
-        // 
+
+        // =========================================
+        // lblSubtitle
+        // =========================================
+        lblSubtitle.AutoSize = true;
+        lblSubtitle.Font = new Font("Segoe UI", 10F);
+        lblSubtitle.ForeColor = Color.FromArgb(235, 220, 225);
+        lblSubtitle.Location = new Point(153, 59);
+        lblSubtitle.Name = "lblSubtitle";
+        lblSubtitle.Size = new Size(393, 19);
+        lblSubtitle.TabIndex = 2;
+        lblSubtitle.Text = "Review shared clearance statuses and manage registrar clearance";
+
+        // =========================================
+        // pnlFormCard
+        // =========================================
+        pnlFormCard.Anchor =
+            AnchorStyles.Top |
+            AnchorStyles.Left |
+            AnchorStyles.Right;
+
+        pnlFormCard.BackColor = Color.White;
+        pnlFormCard.BorderStyle = BorderStyle.FixedSingle;
+
+        pnlFormCard.Controls.Add(lblStudent);
+        pnlFormCard.Controls.Add(cmbStudent);
+        pnlFormCard.Controls.Add(btnCheckStatus);
+
+        pnlFormCard.Controls.Add(lblLibraryStatus);
+        pnlFormCard.Controls.Add(txtLibraryStatus);
+
+        pnlFormCard.Controls.Add(lblMedicalStatus);
+        pnlFormCard.Controls.Add(txtMedicalStatus);
+
+        pnlFormCard.Controls.Add(lblRegistrarStatus);
+        pnlFormCard.Controls.Add(cmbRegistrarStatus);
+
+        pnlFormCard.Controls.Add(lblAccountingStatus);
+        pnlFormCard.Controls.Add(cmbAccountingStatus);
+
+        pnlFormCard.Controls.Add(lblOverallStatus);
+        pnlFormCard.Controls.Add(txtOverallStatus);
+
+        pnlFormCard.Controls.Add(lblRemarks);
+        pnlFormCard.Controls.Add(txtRemarks);
+
+        pnlFormCard.Controls.Add(btnAdd);
+        pnlFormCard.Controls.Add(btnUpdate);
+        pnlFormCard.Controls.Add(btnDelete);
+        pnlFormCard.Controls.Add(btnClear);
+        pnlFormCard.Controls.Add(btnRefresh);
+
+        pnlFormCard.Location = new Point(30, 125);
+        pnlFormCard.Name = "pnlFormCard";
+        pnlFormCard.Size = new Size(1220, 260);
+        pnlFormCard.TabIndex = 1;
+
+        // =========================================
         // lblStudent
-        // 
+        // =========================================
         lblStudent.AutoSize = true;
-        lblStudent.Location = new Point(28, 75);
+        lblStudent.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblStudent.ForeColor = Color.FromArgb(60, 60, 60);
+        lblStudent.Location = new Point(25, 23);
         lblStudent.Name = "lblStudent";
-        lblStudent.Size = new Size(48, 15);
-        lblStudent.TabIndex = 1;
+        lblStudent.Size = new Size(51, 15);
         lblStudent.Text = "Student";
-        // 
+
+        // =========================================
         // cmbStudent
-        // 
+        // =========================================
         cmbStudent.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbStudent.Font = new Font("Segoe UI", 10F);
         cmbStudent.FormattingEnabled = true;
-        cmbStudent.Location = new Point(140, 70);
+        cmbStudent.Location = new Point(25, 45);
         cmbStudent.Name = "cmbStudent";
-        cmbStudent.Size = new Size(390, 23);
-        cmbStudent.TabIndex = 2;
-        // 
+        cmbStudent.Size = new Size(395, 25);
+
+        // =========================================
         // btnCheckStatus
-        // 
-        btnCheckStatus.Location = new Point(571, 66);
+        // =========================================
+        btnCheckStatus.BackColor = Color.FromArgb(128, 0, 24);
+        btnCheckStatus.Cursor = Cursors.Hand;
+        btnCheckStatus.FlatStyle = FlatStyle.Flat;
+        btnCheckStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnCheckStatus.ForeColor = Color.White;
+        btnCheckStatus.Location = new Point(435, 42);
         btnCheckStatus.Name = "btnCheckStatus";
-        btnCheckStatus.Size = new Size(150, 32);
-        btnCheckStatus.TabIndex = 3;
+        btnCheckStatus.Size = new Size(175, 32);
         btnCheckStatus.Text = "Check Shared Status";
-        btnCheckStatus.UseVisualStyleBackColor = true;
+        btnCheckStatus.UseVisualStyleBackColor = false;
         btnCheckStatus.Click += btnCheckStatus_Click;
-        // 
+
+        // =========================================
         // lblLibraryStatus
-        // 
+        // =========================================
         lblLibraryStatus.AutoSize = true;
-        lblLibraryStatus.Location = new Point(28, 117);
+        lblLibraryStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblLibraryStatus.ForeColor = Color.FromArgb(60, 60, 60);
+        lblLibraryStatus.Location = new Point(25, 90);
         lblLibraryStatus.Name = "lblLibraryStatus";
-        lblLibraryStatus.Size = new Size(78, 15);
-        lblLibraryStatus.TabIndex = 4;
         lblLibraryStatus.Text = "Library Status";
-        // 
+
+        // =========================================
         // txtLibraryStatus
-        // 
-        txtLibraryStatus.Location = new Point(140, 112);
+        // =========================================
+        txtLibraryStatus.BackColor = Color.FromArgb(245, 245, 245);
+        txtLibraryStatus.Font = new Font("Segoe UI", 10F);
+        txtLibraryStatus.Location = new Point(25, 112);
         txtLibraryStatus.Name = "txtLibraryStatus";
         txtLibraryStatus.ReadOnly = true;
-        txtLibraryStatus.Size = new Size(390, 23);
-        txtLibraryStatus.TabIndex = 5;
-        // 
+        txtLibraryStatus.Size = new Size(275, 25);
+
+        // =========================================
         // lblMedicalStatus
-        // 
+        // =========================================
         lblMedicalStatus.AutoSize = true;
-        lblMedicalStatus.Location = new Point(585, 117);
+        lblMedicalStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblMedicalStatus.ForeColor = Color.FromArgb(60, 60, 60);
+        lblMedicalStatus.Location = new Point(320, 90);
         lblMedicalStatus.Name = "lblMedicalStatus";
-        lblMedicalStatus.Size = new Size(84, 15);
-        lblMedicalStatus.TabIndex = 6;
         lblMedicalStatus.Text = "Medical Status";
-        // 
+
+        // =========================================
         // txtMedicalStatus
-        // 
-        txtMedicalStatus.Location = new Point(695, 112);
+        // =========================================
+        txtMedicalStatus.BackColor = Color.FromArgb(245, 245, 245);
+        txtMedicalStatus.Font = new Font("Segoe UI", 10F);
+        txtMedicalStatus.Location = new Point(320, 112);
         txtMedicalStatus.Name = "txtMedicalStatus";
         txtMedicalStatus.ReadOnly = true;
-        txtMedicalStatus.Size = new Size(372, 23);
-        txtMedicalStatus.TabIndex = 7;
-        // 
+        txtMedicalStatus.Size = new Size(275, 25);
+
+        // =========================================
         // lblRegistrarStatus
-        // 
+        // =========================================
         lblRegistrarStatus.AutoSize = true;
-        lblRegistrarStatus.Location = new Point(28, 159);
+        lblRegistrarStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblRegistrarStatus.ForeColor = Color.FromArgb(60, 60, 60);
+        lblRegistrarStatus.Location = new Point(615, 90);
         lblRegistrarStatus.Name = "lblRegistrarStatus";
-        lblRegistrarStatus.Size = new Size(88, 15);
-        lblRegistrarStatus.TabIndex = 8;
         lblRegistrarStatus.Text = "Registrar Status";
-        // 
+
+        // =========================================
         // cmbRegistrarStatus
-        // 
+        // =========================================
         cmbRegistrarStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbRegistrarStatus.Font = new Font("Segoe UI", 10F);
         cmbRegistrarStatus.FormattingEnabled = true;
-        cmbRegistrarStatus.Location = new Point(140, 154);
+        cmbRegistrarStatus.Location = new Point(615, 112);
         cmbRegistrarStatus.Name = "cmbRegistrarStatus";
-        cmbRegistrarStatus.Size = new Size(390, 23);
-        cmbRegistrarStatus.TabIndex = 9;
-        // 
+        cmbRegistrarStatus.Size = new Size(275, 25);
+
+        // =========================================
         // lblAccountingStatus
-        // 
+        // =========================================
         lblAccountingStatus.AutoSize = true;
-        lblAccountingStatus.Location = new Point(585, 159);
+        lblAccountingStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblAccountingStatus.ForeColor = Color.FromArgb(60, 60, 60);
+        lblAccountingStatus.Location = new Point(910, 90);
         lblAccountingStatus.Name = "lblAccountingStatus";
-        lblAccountingStatus.Size = new Size(104, 15);
-        lblAccountingStatus.TabIndex = 10;
         lblAccountingStatus.Text = "Accounting Status";
-        // 
+
+        // =========================================
         // cmbAccountingStatus
-        // 
+        // =========================================
+        cmbAccountingStatus.BackColor = Color.FromArgb(245, 245, 245);
         cmbAccountingStatus.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbAccountingStatus.Enabled = false;
+        cmbAccountingStatus.Font = new Font("Segoe UI", 10F);
         cmbAccountingStatus.FormattingEnabled = true;
-        cmbAccountingStatus.Location = new Point(695, 154);
+        cmbAccountingStatus.Location = new Point(910, 112);
         cmbAccountingStatus.Name = "cmbAccountingStatus";
-        cmbAccountingStatus.Size = new Size(372, 23);
-        cmbAccountingStatus.TabIndex = 11;
-        // 
-        // lblGuidanceStatus
-        // 
-        lblGuidanceStatus.AutoSize = true;
-        lblGuidanceStatus.Location = new Point(28, 201);
-        lblGuidanceStatus.Name = "lblGuidanceStatus";
-        lblGuidanceStatus.Size = new Size(92, 15);
-        lblGuidanceStatus.TabIndex = 12;
-        lblGuidanceStatus.Text = "Guidance Status";
-        // 
-        // cmbGuidanceStatus
-        // 
-        cmbGuidanceStatus.DropDownStyle = ComboBoxStyle.DropDownList;
-        cmbGuidanceStatus.FormattingEnabled = true;
-        cmbGuidanceStatus.Location = new Point(140, 196);
-        cmbGuidanceStatus.Name = "cmbGuidanceStatus";
-        cmbGuidanceStatus.Size = new Size(390, 23);
-        cmbGuidanceStatus.TabIndex = 13;
-        // 
+        cmbAccountingStatus.Size = new Size(275, 25);
+
+        // =========================================
         // lblOverallStatus
-        // 
+        // =========================================
         lblOverallStatus.AutoSize = true;
-        lblOverallStatus.Location = new Point(585, 201);
+        lblOverallStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblOverallStatus.ForeColor = Color.FromArgb(60, 60, 60);
+        lblOverallStatus.Location = new Point(25, 155);
         lblOverallStatus.Name = "lblOverallStatus";
-        lblOverallStatus.Size = new Size(79, 15);
-        lblOverallStatus.TabIndex = 14;
         lblOverallStatus.Text = "Overall Status";
-        // 
+
+        // =========================================
         // txtOverallStatus
-        // 
-        txtOverallStatus.Location = new Point(695, 196);
+        // =========================================
+        txtOverallStatus.BackColor = Color.FromArgb(245, 245, 245);
+        txtOverallStatus.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        txtOverallStatus.Location = new Point(25, 177);
         txtOverallStatus.Name = "txtOverallStatus";
         txtOverallStatus.ReadOnly = true;
-        txtOverallStatus.Size = new Size(372, 23);
-        txtOverallStatus.TabIndex = 15;
-        // 
+        txtOverallStatus.Size = new Size(275, 25);
+
+        // =========================================
         // lblRemarks
-        // 
+        // =========================================
         lblRemarks.AutoSize = true;
-        lblRemarks.Location = new Point(28, 243);
+        lblRemarks.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblRemarks.ForeColor = Color.FromArgb(60, 60, 60);
+        lblRemarks.Location = new Point(320, 155);
         lblRemarks.Name = "lblRemarks";
-        lblRemarks.Size = new Size(52, 15);
-        lblRemarks.TabIndex = 16;
         lblRemarks.Text = "Remarks";
-        // 
+
+        // =========================================
         // txtRemarks
-        // 
-        txtRemarks.Location = new Point(140, 238);
+        // =========================================
+        txtRemarks.Font = new Font("Segoe UI", 10F);
+        txtRemarks.Location = new Point(320, 177);
         txtRemarks.Name = "txtRemarks";
-        txtRemarks.Size = new Size(390, 23);
-        txtRemarks.TabIndex = 17;
-        // 
+        txtRemarks.Size = new Size(570, 25);
+
+        // =========================================
         // btnAdd
-        // 
-        btnAdd.Location = new Point(28, 282);
+        // =========================================
+        btnAdd.BackColor = Color.FromArgb(128, 0, 24);
+        btnAdd.Cursor = Cursors.Hand;
+        btnAdd.FlatStyle = FlatStyle.Flat;
+        btnAdd.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnAdd.ForeColor = Color.White;
+        btnAdd.Location = new Point(25, 217);
         btnAdd.Name = "btnAdd";
-        btnAdd.Size = new Size(95, 34);
-        btnAdd.TabIndex = 18;
+        btnAdd.Size = new Size(105, 32);
         btnAdd.Text = "Add";
-        btnAdd.UseVisualStyleBackColor = true;
+        btnAdd.UseVisualStyleBackColor = false;
         btnAdd.Click += btnAdd_Click;
-        // 
+
+        // =========================================
         // btnUpdate
-        // 
+        // =========================================
+        btnUpdate.BackColor = Color.White;
+        btnUpdate.Cursor = Cursors.Hand;
         btnUpdate.Enabled = false;
-        btnUpdate.Location = new Point(133, 282);
+        btnUpdate.FlatStyle = FlatStyle.Flat;
+        btnUpdate.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnUpdate.ForeColor = Color.FromArgb(128, 0, 24);
+        btnUpdate.Location = new Point(140, 217);
         btnUpdate.Name = "btnUpdate";
-        btnUpdate.Size = new Size(95, 34);
-        btnUpdate.TabIndex = 19;
+        btnUpdate.Size = new Size(105, 32);
         btnUpdate.Text = "Update";
-        btnUpdate.UseVisualStyleBackColor = true;
+        btnUpdate.UseVisualStyleBackColor = false;
         btnUpdate.Click += btnUpdate_Click;
-        // 
+
+        // =========================================
         // btnDelete
-        // 
+        // =========================================
+        btnDelete.BackColor = Color.White;
+        btnDelete.Cursor = Cursors.Hand;
         btnDelete.Enabled = false;
-        btnDelete.Location = new Point(238, 282);
+        btnDelete.FlatStyle = FlatStyle.Flat;
+        btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnDelete.ForeColor = Color.FromArgb(220, 53, 69);
+        btnDelete.Location = new Point(255, 217);
         btnDelete.Name = "btnDelete";
-        btnDelete.Size = new Size(95, 34);
-        btnDelete.TabIndex = 20;
+        btnDelete.Size = new Size(105, 32);
         btnDelete.Text = "Delete";
-        btnDelete.UseVisualStyleBackColor = true;
+        btnDelete.UseVisualStyleBackColor = false;
         btnDelete.Click += btnDelete_Click;
-        // 
+
+        // =========================================
         // btnClear
-        // 
-        btnClear.Location = new Point(343, 282);
+        // =========================================
+        btnClear.BackColor = Color.White;
+        btnClear.Cursor = Cursors.Hand;
+        btnClear.FlatStyle = FlatStyle.Flat;
+        btnClear.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnClear.ForeColor = Color.FromArgb(128, 0, 24);
+        btnClear.Location = new Point(370, 217);
         btnClear.Name = "btnClear";
-        btnClear.Size = new Size(95, 34);
-        btnClear.TabIndex = 21;
+        btnClear.Size = new Size(105, 32);
         btnClear.Text = "Clear";
-        btnClear.UseVisualStyleBackColor = true;
+        btnClear.UseVisualStyleBackColor = false;
         btnClear.Click += btnClear_Click;
-        // 
+
+        // =========================================
         // btnRefresh
-        // 
-        btnRefresh.Location = new Point(448, 282);
+        // =========================================
+        btnRefresh.BackColor = Color.White;
+        btnRefresh.Cursor = Cursors.Hand;
+        btnRefresh.FlatStyle = FlatStyle.Flat;
+        btnRefresh.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnRefresh.ForeColor = Color.FromArgb(128, 0, 24);
+        btnRefresh.Location = new Point(485, 217);
         btnRefresh.Name = "btnRefresh";
-        btnRefresh.Size = new Size(95, 34);
-        btnRefresh.TabIndex = 22;
+        btnRefresh.Size = new Size(105, 32);
         btnRefresh.Text = "Refresh";
-        btnRefresh.UseVisualStyleBackColor = true;
+        btnRefresh.UseVisualStyleBackColor = false;
         btnRefresh.Click += btnRefresh_Click;
-        // 
+
+        // =========================================
+        // pnlSearch
+        // =========================================
+        pnlSearch.Anchor =
+            AnchorStyles.Top |
+            AnchorStyles.Left |
+            AnchorStyles.Right;
+
+        pnlSearch.BackColor = Color.White;
+        pnlSearch.BorderStyle = BorderStyle.FixedSingle;
+        pnlSearch.Controls.Add(lblSearch);
+        pnlSearch.Controls.Add(txtSearch);
+        pnlSearch.Controls.Add(btnSearch);
+        pnlSearch.Location = new Point(30, 400);
+        pnlSearch.Name = "pnlSearch";
+        pnlSearch.Size = new Size(1220, 65);
+        pnlSearch.TabIndex = 2;
+
+        // =========================================
         // lblSearch
-        // 
+        // =========================================
         lblSearch.AutoSize = true;
-        lblSearch.Location = new Point(28, 347);
+        lblSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        lblSearch.ForeColor = Color.FromArgb(60, 60, 60);
+        lblSearch.Location = new Point(20, 22);
         lblSearch.Name = "lblSearch";
-        lblSearch.Size = new Size(42, 15);
-        lblSearch.TabIndex = 23;
         lblSearch.Text = "Search";
-        // 
+
+        // =========================================
         // txtSearch
-        // 
-        txtSearch.Location = new Point(90, 342);
+        // =========================================
+        txtSearch.Font = new Font("Segoe UI", 10F);
+        txtSearch.Location = new Point(85, 18);
         txtSearch.Name = "txtSearch";
-        txtSearch.Size = new Size(360, 23);
-        txtSearch.TabIndex = 24;
-        // 
+        txtSearch.Size = new Size(420, 25);
+
+        // =========================================
         // btnSearch
-        // 
-        btnSearch.Location = new Point(460, 338);
+        // =========================================
+        btnSearch.BackColor = Color.FromArgb(128, 0, 24);
+        btnSearch.Cursor = Cursors.Hand;
+        btnSearch.FlatStyle = FlatStyle.Flat;
+        btnSearch.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+        btnSearch.ForeColor = Color.White;
+        btnSearch.Location = new Point(520, 15);
         btnSearch.Name = "btnSearch";
-        btnSearch.Size = new Size(95, 32);
-        btnSearch.TabIndex = 25;
+        btnSearch.Size = new Size(105, 32);
         btnSearch.Text = "Search";
-        btnSearch.UseVisualStyleBackColor = true;
+        btnSearch.UseVisualStyleBackColor = false;
         btnSearch.Click += btnSearch_Click;
-        // 
+
+        // =========================================
         // dgvClearances
-        // 
+        // =========================================
         dgvClearances.AllowUserToAddRows = false;
         dgvClearances.AllowUserToDeleteRows = false;
-        dgvClearances.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-        dgvClearances.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle1.BackColor = SystemColors.Control;
-        dataGridViewCellStyle1.Font = new Font("Segoe UI", 9F);
-        dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
-        dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-        dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-        dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-        dgvClearances.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
-        dgvClearances.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle2.BackColor = SystemColors.Window;
-        dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F);
-        dataGridViewCellStyle2.ForeColor = SystemColors.ControlText;
-        dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-        dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-        dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-        dgvClearances.DefaultCellStyle = dataGridViewCellStyle2;
-        dgvClearances.Location = new Point(28, 386);
-        dgvClearances.MultiSelect = false;
-        dgvClearances.Name = "dgvClearances";
-        dgvClearances.ReadOnly = true;
-        dgvClearances.RowHeadersWidth = 51;
-        dgvClearances.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        dgvClearances.Size = new Size(1097, 294);
-        dgvClearances.TabIndex = 26;
-        dgvClearances.CellClick += dgvClearances_CellClick;
-        // 
+
+        dgvClearances.Anchor =
+            AnchorStyles.Top |
+            AnchorStyles.Bottom |
+            AnchorStyles.Left |
+            AnchorStyles.Right;
+
+        dgvClearances.AutoSizeColumnsMode =
+            DataGridViewAutoSizeColumnsMode.Fill;
+
+        dgvClearances.BackgroundColor = Color.White;
+        dgvClearances.BorderStyle = BorderStyle.FixedSingle;
+
+        dgvClearances.CellBorderStyle =
+            DataGridViewCellBorderStyle.SingleHorizontal;
+
+        dgvClearances.ColumnHeadersBorderStyle =
+            DataGridViewHeaderBorderStyle.None;
+
+        headerStyle.Alignment =
+            DataGridViewContentAlignment.MiddleLeft;
+
+        headerStyle.BackColor =
+            Color.FromArgb(128, 0, 24);
+
+        headerStyle.Font =
+            new Font("Segoe UI", 9F, FontStyle.Bold);
+
+        headerStyle.ForeColor =
+            Color.White;
+
+        headerStyle.SelectionBackColor =
+            Color.FromArgb(128, 0, 24);
+
+        headerStyle.SelectionForeColor =
+            Color.White;
+
+        headerStyle.WrapMode =
+            DataGridViewTriState.True;
+
+        dgvClearances.ColumnHeadersDefaultCellStyle =
+            headerStyle;
+
+        dgvClearances.ColumnHeadersHeight =
+            42;
+
+        dgvClearances.EnableHeadersVisualStyles =
+            false;
+
+        cellStyle.Alignment =
+            DataGridViewContentAlignment.MiddleLeft;
+
+        cellStyle.BackColor =
+            Color.White;
+
+        cellStyle.Font =
+            new Font("Segoe UI", 9F);
+
+        cellStyle.ForeColor =
+            Color.FromArgb(50, 50, 50);
+
+        cellStyle.SelectionBackColor =
+            Color.FromArgb(245, 225, 230);
+
+        cellStyle.SelectionForeColor =
+            Color.FromArgb(80, 0, 15);
+
+        cellStyle.WrapMode =
+            DataGridViewTriState.False;
+
+        dgvClearances.DefaultCellStyle =
+            cellStyle;
+
+        dgvClearances.GridColor =
+            Color.FromArgb(230, 230, 230);
+
+        dgvClearances.Location =
+            new Point(30, 480);
+
+        dgvClearances.MultiSelect =
+            false;
+
+        dgvClearances.Name =
+            "dgvClearances";
+
+        dgvClearances.ReadOnly =
+            true;
+
+        dgvClearances.RowHeadersVisible =
+            false;
+
+        dgvClearances.RowTemplate.Height =
+            34;
+
+        dgvClearances.SelectionMode =
+            DataGridViewSelectionMode.FullRowSelect;
+
+        dgvClearances.Size =
+            new Size(1220, 230);
+
+        dgvClearances.TabIndex =
+            3;
+
+        dgvClearances.CellClick +=
+            dgvClearances_CellClick;
+
+        // =========================================
+        // pnlFooter
+        // =========================================
+        pnlFooter.BackColor = Color.FromArgb(245, 245, 245);
+        pnlFooter.Controls.Add(lblFooter);
+        pnlFooter.Dock = DockStyle.Bottom;
+        pnlFooter.Location = new Point(0, 730);
+        pnlFooter.Name = "pnlFooter";
+        pnlFooter.Size = new Size(1280, 40);
+        pnlFooter.TabIndex = 4;
+
+        // =========================================
+        // lblFooter
+        // =========================================
+        lblFooter.Dock = DockStyle.Fill;
+        lblFooter.Font = new Font("Segoe UI", 8.5F);
+        lblFooter.ForeColor = Color.Gray;
+        lblFooter.Text =
+            "(c) 2026 Batangas State University - Registrar Management System";
+        lblFooter.TextAlign =
+            ContentAlignment.MiddleCenter;
+
+        // =========================================
         // StudentClearancesForm
-        // 
-        AutoScaleDimensions = new SizeF(7F, 15F);
-        AutoScaleMode = AutoScaleMode.Font;
-        BackColor = Color.White;
-        ClientSize = new Size(1180, 720);
+        // =========================================
+        AutoScaleDimensions =
+            new SizeF(7F, 15F);
+
+        AutoScaleMode =
+            AutoScaleMode.Font;
+
+        BackColor =
+            Color.FromArgb(245, 245, 245);
+
+        ClientSize =
+            new Size(1280, 770);
+
         Controls.Add(dgvClearances);
-        Controls.Add(btnSearch);
-        Controls.Add(txtSearch);
-        Controls.Add(lblSearch);
-        Controls.Add(btnRefresh);
-        Controls.Add(btnClear);
-        Controls.Add(btnDelete);
-        Controls.Add(btnUpdate);
-        Controls.Add(btnAdd);
-        Controls.Add(txtRemarks);
-        Controls.Add(lblRemarks);
-        Controls.Add(txtOverallStatus);
-        Controls.Add(lblOverallStatus);
-        Controls.Add(cmbGuidanceStatus);
-        Controls.Add(lblGuidanceStatus);
-        Controls.Add(cmbAccountingStatus);
-        Controls.Add(lblAccountingStatus);
-        Controls.Add(cmbRegistrarStatus);
-        Controls.Add(lblRegistrarStatus);
-        Controls.Add(txtMedicalStatus);
-        Controls.Add(lblMedicalStatus);
-        Controls.Add(txtLibraryStatus);
-        Controls.Add(lblLibraryStatus);
-        Controls.Add(btnCheckStatus);
-        Controls.Add(cmbStudent);
-        Controls.Add(lblStudent);
-        Controls.Add(lblTitle);
-        Font = new Font("Segoe UI", 9F);
-        MinimumSize = new Size(980, 620);
-        Name = "StudentClearancesForm";
-        StartPosition = FormStartPosition.CenterParent;
-        Text = "Student Clearances";
-        ((System.ComponentModel.ISupportInitialize)dgvClearances).EndInit();
+        Controls.Add(pnlSearch);
+        Controls.Add(pnlFormCard);
+        Controls.Add(pnlHeader);
+        Controls.Add(pnlFooter);
+
+        Font =
+            new Font("Segoe UI", 9F);
+
+        MinimumSize =
+            new Size(1100, 700);
+
+        Name =
+            "StudentClearancesForm";
+
+        StartPosition =
+            FormStartPosition.CenterScreen;
+
+        Text =
+            "Student Clearances";
+
+        pnlHeader.ResumeLayout(false);
+        pnlHeader.PerformLayout();
+
+        ((System.ComponentModel.ISupportInitialize)picLogo)
+            .EndInit();
+
+        pnlFormCard.ResumeLayout(false);
+        pnlFormCard.PerformLayout();
+
+        pnlSearch.ResumeLayout(false);
+        pnlSearch.PerformLayout();
+
+        ((System.ComponentModel.ISupportInitialize)dgvClearances)
+            .EndInit();
+
+        pnlFooter.ResumeLayout(false);
+
         ResumeLayout(false);
-        PerformLayout();
     }
 }

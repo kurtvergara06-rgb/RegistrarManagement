@@ -1,6 +1,7 @@
 using RegistrarManagement.Helpers;
 using RegistrarManagement.Models;
 using RegistrarManagement.Services;
+using System.Drawing.Drawing2D;
 
 namespace RegistrarManagement.Forms;
 
@@ -19,6 +20,17 @@ public partial class AcademicRecordsForm : Form
     public AcademicRecordsForm()
     {
         InitializeComponent();
+
+        Color maroon = Color.FromArgb(128, 0, 24);
+        Color red = Color.FromArgb(220, 53, 69);
+        Color gray = Color.FromArgb(180, 180, 180);
+
+        SetRoundedButton(btnAdd, 10, maroon);
+        SetRoundedButton(btnUpdate, 10, gray);
+        SetRoundedButton(btnDelete, 10, red);
+        SetRoundedButton(btnClear, 10, maroon);
+        SetRoundedButton(btnRefresh, 10, maroon);
+        SetRoundedButton(btnSearch, 8, maroon);
 
         // Program comes from the selected student's Firebase record.
         cmbProgram.Enabled = false;
@@ -48,6 +60,117 @@ public partial class AcademicRecordsForm : Form
             "Graduated",
             "Inactive"
         ]);
+    }
+
+    private GraphicsPath GetRoundedPath(
+        Rectangle rectangle,
+        int radius)
+    {
+        GraphicsPath path = new();
+
+        int diameter = radius * 2;
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Y,
+            diameter,
+            diameter,
+            180,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Y,
+            diameter,
+            diameter,
+            270,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            0,
+            90
+        );
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            90,
+            90
+        );
+
+        path.CloseFigure();
+
+        return path;
+    }
+
+    private void SetRoundedButton(
+        Button button,
+        int radius,
+        Color borderColor)
+    {
+        button.FlatStyle = FlatStyle.Flat;
+        button.FlatAppearance.BorderSize = 0;
+
+        void ApplyRegion()
+        {
+            Rectangle rectangle = new(
+                0,
+                0,
+                button.Width,
+                button.Height
+            );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            button.Region?.Dispose();
+            button.Region = new Region(path);
+        }
+
+        button.Paint += (sender, e) =>
+        {
+            e.Graphics.SmoothingMode =
+                SmoothingMode.AntiAlias;
+
+            Rectangle rectangle = new(
+                1,
+                1,
+                button.Width - 3,
+                button.Height - 3
+            );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            using Pen pen = new(
+                borderColor,
+                1.5F
+            );
+
+            e.Graphics.DrawPath(
+                pen,
+                path
+            );
+        };
+
+        button.Resize +=
+            (sender, e) => ApplyRegion();
+
+        ApplyRegion();
     }
 
     private async void Form_Load(
@@ -114,10 +237,13 @@ public partial class AcademicRecordsForm : Form
             .Where(schoolYear =>
                 !string.IsNullOrWhiteSpace(schoolYear))
             .Distinct()
-            .OrderByDescending(schoolYear => schoolYear)
+            .OrderByDescending(
+                schoolYear => schoolYear
+            )
             .ToList();
 
-        cmbSchoolYear.DataSource = schoolYears;
+        cmbSchoolYear.DataSource =
+            schoolYears;
 
         if (schoolYears.Count > 0)
         {
@@ -144,7 +270,8 @@ public partial class AcademicRecordsForm : Form
             return;
         }
 
-        if (cmbStudent.SelectedItem is not Student student)
+        if (cmbStudent.SelectedItem
+            is not Student student)
         {
             cmbProgram.SelectedIndex = -1;
             cmbYearLevel.SelectedIndex = -1;
@@ -165,59 +292,77 @@ public partial class AcademicRecordsForm : Form
         }
 
         string schoolYear =
-            cmbSchoolYear.SelectedItem?.ToString()
+            cmbSchoolYear.SelectedItem
+                ?.ToString()
             ?? string.Empty;
 
-        if (string.IsNullOrWhiteSpace(schoolYear))
+        if (string.IsNullOrWhiteSpace(
+            schoolYear))
         {
             cmbSemester.DataSource = null;
             cmbSemester.Items.Clear();
             return;
         }
 
-        LoadSemestersForSchoolYear(schoolYear);
+        LoadSemestersForSchoolYear(
+            schoolYear
+        );
     }
 
     private void LoadSemestersForSchoolYear(
         string schoolYear)
     {
-        List<string> semesters = _academicOfferings
-            .Where(offering =>
-                offering.SchoolYear.Equals(
-                    schoolYear,
-                    StringComparison.OrdinalIgnoreCase
+        List<string> semesters =
+            _academicOfferings
+                .Where(offering =>
+                    offering.SchoolYear.Equals(
+                        schoolYear,
+                        StringComparison.OrdinalIgnoreCase
+                    )
                 )
-            )
-            .Select(offering =>
-                NormalizeSemester(offering.Semester)
-            )
-            .Where(semester =>
-                !string.IsNullOrWhiteSpace(semester)
-            )
-            .Distinct()
-            .OrderBy(semester => semester)
-            .ToList();
+                .Select(offering =>
+                    NormalizeSemester(
+                        offering.Semester
+                    )
+                )
+                .Where(semester =>
+                    !string.IsNullOrWhiteSpace(
+                        semester
+                    )
+                )
+                .Distinct()
+                .OrderBy(
+                    semester => semester
+                )
+                .ToList();
 
-        cmbSemester.DataSource = semesters;
+        cmbSemester.DataSource =
+            semesters;
 
         cmbSemester.SelectedIndex =
-            semesters.Count > 0 ? 0 : -1;
+            semesters.Count > 0
+                ? 0
+                : -1;
     }
 
     private static string NormalizeSemester(
         string semester)
     {
-        string value = semester.Trim();
+        string value =
+            semester.Trim();
 
-        return value.ToLowerInvariant() switch
+        return value.ToLowerInvariant()
+            switch
         {
             "1st" => "1st Semester",
             "first" => "1st Semester",
-            "1st semester" => "1st Semester",
+            "1st semester" =>
+                "1st Semester",
 
             "2nd" => "2nd Semester",
             "second" => "2nd Semester",
-            "2nd semester" => "2nd Semester",
+            "2nd semester" =>
+                "2nd Semester",
 
             "summer" => "Summer",
 
@@ -228,19 +373,29 @@ public partial class AcademicRecordsForm : Form
     private static string NormalizeYearLevel(
         string yearLevel)
     {
-        string value = yearLevel.Trim();
+        string value =
+            yearLevel.Trim();
 
         return value switch
         {
-            "1" or "1.0" => "1st Year",
-            "2" or "2.0" => "2nd Year",
-            "3" or "3.0" => "3rd Year",
-            "4" or "4.0" => "4th Year",
+            "1" or "1.0" =>
+                "1st Year",
+
+            "2" or "2.0" =>
+                "2nd Year",
+
+            "3" or "3.0" =>
+                "3rd Year",
+
+            "4" or "4.0" =>
+                "4th Year",
+
             _ => value
         };
     }
 
-    private void SelectProgram(string programId)
+    private void SelectProgram(
+        string programId)
     {
         cmbProgram.SelectedIndex = -1;
 
@@ -248,22 +403,28 @@ public partial class AcademicRecordsForm : Form
              index < cmbProgram.Items.Count;
              index++)
         {
-            if (cmbProgram.Items[index] is ProgramModel program
+            if (cmbProgram.Items[index]
+                    is ProgramModel program
                 && program.ProgramId.Equals(
                     programId,
                     StringComparison.OrdinalIgnoreCase
                 ))
             {
-                cmbProgram.SelectedIndex = index;
+                cmbProgram.SelectedIndex =
+                    index;
+
                 return;
             }
         }
     }
 
-    private void SelectYearLevel(string yearLevel)
+    private void SelectYearLevel(
+        string yearLevel)
     {
         string normalizedYearLevel =
-            NormalizeYearLevel(yearLevel);
+            NormalizeYearLevel(
+                yearLevel
+            );
 
         cmbYearLevel.SelectedIndex = -1;
 
@@ -272,7 +433,8 @@ public partial class AcademicRecordsForm : Form
              index++)
         {
             string currentItem =
-                cmbYearLevel.Items[index]?.ToString()
+                cmbYearLevel.Items[index]
+                    ?.ToString()
                 ?? string.Empty;
 
             if (currentItem.Equals(
@@ -280,31 +442,41 @@ public partial class AcademicRecordsForm : Form
                 StringComparison.OrdinalIgnoreCase
             ))
             {
-                cmbYearLevel.SelectedIndex = index;
+                cmbYearLevel.SelectedIndex =
+                    index;
+
                 return;
             }
         }
     }
 
-    private AcademicRecord BuildRecord(string recordId)
+    private AcademicRecord BuildRecord(
+        string recordId)
     {
         return new AcademicRecord
         {
             RecordId = recordId,
 
             StudentId =
-                (cmbStudent.SelectedItem as Student)
+                (cmbStudent.SelectedItem
+                    as Student)
                     ?.StudentId
                 ?? string.Empty,
 
             ProgramId =
-                (cmbProgram.SelectedItem as ProgramModel)
+                (cmbProgram.SelectedItem
+                    as ProgramModel)
                     ?.ProgramId
                 ?? string.Empty,
 
-            SchoolYear = cmbSchoolYear.Text,
-            Semester = cmbSemester.Text,
-            YearLevel = cmbYearLevel.Text,
+            SchoolYear =
+                cmbSchoolYear.Text,
+
+            Semester =
+                cmbSemester.Text,
+
+            YearLevel =
+                cmbYearLevel.Text,
 
             AcademicStatus =
                 cmbAcademicStatus.Text,
@@ -316,8 +488,10 @@ public partial class AcademicRecordsForm : Form
 
     private bool IsFormValid()
     {
-        return cmbStudent.SelectedItem != null
-            && cmbProgram.SelectedItem != null
+        return cmbStudent.SelectedItem
+                != null
+            && cmbProgram.SelectedItem
+                != null
             && ValidationHelper.Required(
                 cmbSchoolYear.Text,
                 cmbSemester.Text,
@@ -326,9 +500,11 @@ public partial class AcademicRecordsForm : Form
             );
     }
 
-    private async Task<bool> HasValidRegistrationAsync()
+    private async Task<bool>
+        HasValidRegistrationAsync()
     {
-        if (cmbStudent.SelectedItem is not Student student)
+        if (cmbStudent.SelectedItem
+            is not Student student)
         {
             return false;
         }
@@ -339,26 +515,31 @@ public partial class AcademicRecordsForm : Form
         string selectedSemester =
             cmbSemester.Text.Trim();
 
-        List<StudentRegistration> registrations =
-            await _registrations.GetAllAsync();
+        List<StudentRegistration>
+            registrations =
+                await _registrations
+                    .GetAllAsync();
 
-        return registrations.Any(registration =>
-            registration.StudentId.Equals(
-                student.StudentId,
-                StringComparison.OrdinalIgnoreCase
-            )
-            && registration.SchoolYear.Equals(
-                selectedSchoolYear,
-                StringComparison.OrdinalIgnoreCase
-            )
-            && registration.Semester.Equals(
-                selectedSemester,
-                StringComparison.OrdinalIgnoreCase
-            )
-            && registration.RegistrationStatus.Equals(
-                "Registered",
-                StringComparison.OrdinalIgnoreCase
-            )
+        return registrations.Any(
+            registration =>
+                registration.StudentId.Equals(
+                    student.StudentId,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                && registration.SchoolYear.Equals(
+                    selectedSchoolYear,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                && registration.Semester.Equals(
+                    selectedSemester,
+                    StringComparison.OrdinalIgnoreCase
+                )
+                && registration
+                    .RegistrationStatus
+                    .Equals(
+                        "Registered",
+                        StringComparison.OrdinalIgnoreCase
+                    )
         );
     }
 
@@ -401,23 +582,27 @@ public partial class AcademicRecordsForm : Form
                     IdGenerator.Create("AR")
                 );
 
-            List<AcademicRecord> existingRecords =
-                await _service.GetAllAsync();
+            List<AcademicRecord>
+                existingRecords =
+                    await _service
+                        .GetAllAsync();
 
-            bool duplicate = existingRecords.Any(existing =>
-                existing.StudentId.Equals(
-                    record.StudentId,
-                    StringComparison.OrdinalIgnoreCase
-                )
-                && existing.SchoolYear.Equals(
-                    record.SchoolYear,
-                    StringComparison.OrdinalIgnoreCase
-                )
-                && existing.Semester.Equals(
-                    record.Semester,
-                    StringComparison.OrdinalIgnoreCase
-                )
-            );
+            bool duplicate =
+                existingRecords.Any(
+                    existing =>
+                        existing.StudentId.Equals(
+                            record.StudentId,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                        && existing.SchoolYear.Equals(
+                            record.SchoolYear,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                        && existing.Semester.Equals(
+                            record.Semester,
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                );
 
             if (duplicate)
             {
@@ -432,7 +617,10 @@ public partial class AcademicRecordsForm : Form
                 return;
             }
 
-            await _service.SaveAsync(record);
+            await _service.SaveAsync(
+                record
+            );
+
             await LoadGridAsync();
 
             ClearFields();
@@ -502,9 +690,14 @@ public partial class AcademicRecordsForm : Form
             }
 
             AcademicRecord record =
-                BuildRecord(_selectedRecordId);
+                BuildRecord(
+                    _selectedRecordId
+                );
 
-            await _service.SaveAsync(record);
+            await _service.SaveAsync(
+                record
+            );
+
             await LoadGridAsync();
 
             ClearFields();
@@ -543,12 +736,13 @@ public partial class AcademicRecordsForm : Form
             return;
         }
 
-        DialogResult result = MessageBox.Show(
-            "Delete the selected academic record?",
-            "Confirm Delete",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question
-        );
+        DialogResult result =
+            MessageBox.Show(
+                "Delete the selected academic record?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
 
         if (result != DialogResult.Yes)
         {
@@ -562,6 +756,7 @@ public partial class AcademicRecordsForm : Form
             );
 
             await LoadGridAsync();
+
             ClearFields();
 
             MessageBox.Show(
@@ -627,31 +822,38 @@ public partial class AcademicRecordsForm : Form
             List<AcademicRecord> records =
                 await _service.GetAllAsync();
 
-            if (string.IsNullOrWhiteSpace(searchText))
+            if (string.IsNullOrWhiteSpace(
+                searchText))
             {
-                dgvAcademicRecords.DataSource = records;
-                dgvAcademicRecords.ClearSelection();
+                dgvAcademicRecords.DataSource =
+                    records;
+
+                dgvAcademicRecords
+                    .ClearSelection();
+
                 return;
             }
 
-            dgvAcademicRecords.DataSource = records
-                .Where(record =>
-                    record.RecordId
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.StudentId
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.SchoolYear
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.AcademicStatus
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                )
-                .ToList();
+            dgvAcademicRecords.DataSource =
+                records
+                    .Where(record =>
+                        record.RecordId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.StudentId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.SchoolYear
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.AcademicStatus
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                    )
+                    .ToList();
 
-            dgvAcademicRecords.ClearSelection();
+            dgvAcademicRecords
+                .ClearSelection();
         }
         catch (Exception ex)
         {
@@ -682,10 +884,12 @@ public partial class AcademicRecordsForm : Form
         }
 
         object? selectedItem =
-            dgvAcademicRecords.Rows[e.RowIndex]
+            dgvAcademicRecords
+                .Rows[e.RowIndex]
                 .DataBoundItem;
 
-        if (selectedItem is not AcademicRecord record)
+        if (selectedItem
+            is not AcademicRecord record)
         {
             return;
         }
@@ -694,11 +898,20 @@ public partial class AcademicRecordsForm : Form
 
         try
         {
-            _selectedRecordId = record.RecordId;
+            _selectedRecordId =
+                record.RecordId;
 
-            SelectStudent(record.StudentId);
-            SelectProgram(record.ProgramId);
-            SelectSchoolYear(record.SchoolYear);
+            SelectStudent(
+                record.StudentId
+            );
+
+            SelectProgram(
+                record.ProgramId
+            );
+
+            SelectSchoolYear(
+                record.SchoolYear
+            );
 
             LoadSemestersForSchoolYear(
                 record.SchoolYear
@@ -716,19 +929,24 @@ public partial class AcademicRecordsForm : Form
             txtRemarks.Text =
                 record.Remarks;
 
-            // Prevent changing the owner of an existing record.
-            cmbStudent.Enabled = false;
+            cmbStudent.Enabled =
+                false;
 
-            btnUpdate.Enabled = true;
-            btnDelete.Enabled = true;
+            btnUpdate.Enabled =
+                true;
+
+            btnDelete.Enabled =
+                true;
         }
         finally
         {
-            _isLoadingRecord = false;
+            _isLoadingRecord =
+                false;
         }
     }
 
-    private void SelectStudent(string studentId)
+    private void SelectStudent(
+        string studentId)
     {
         cmbStudent.SelectedIndex = -1;
 
@@ -736,28 +954,34 @@ public partial class AcademicRecordsForm : Form
              index < cmbStudent.Items.Count;
              index++)
         {
-            if (cmbStudent.Items[index] is Student student
+            if (cmbStudent.Items[index]
+                    is Student student
                 && student.StudentId.Equals(
                     studentId,
                     StringComparison.OrdinalIgnoreCase
                 ))
             {
-                cmbStudent.SelectedIndex = index;
+                cmbStudent.SelectedIndex =
+                    index;
+
                 return;
             }
         }
     }
 
-    private void SelectSchoolYear(string schoolYear)
+    private void SelectSchoolYear(
+        string schoolYear)
     {
-        cmbSchoolYear.SelectedIndex = -1;
+        cmbSchoolYear.SelectedIndex =
+            -1;
 
         for (int index = 0;
              index < cmbSchoolYear.Items.Count;
              index++)
         {
             string currentSchoolYear =
-                cmbSchoolYear.Items[index]?.ToString()
+                cmbSchoolYear.Items[index]
+                    ?.ToString()
                 ?? string.Empty;
 
             if (currentSchoolYear.Equals(
@@ -765,7 +989,9 @@ public partial class AcademicRecordsForm : Form
                 StringComparison.OrdinalIgnoreCase
             ))
             {
-                cmbSchoolYear.SelectedIndex = index;
+                cmbSchoolYear.SelectedIndex =
+                    index;
+
                 return;
             }
         }
@@ -780,7 +1006,8 @@ public partial class AcademicRecordsForm : Form
         btnUpdate.Enabled = false;
         btnDelete.Enabled = false;
 
-        dgvAcademicRecords.ClearSelection();
+        dgvAcademicRecords
+            .ClearSelection();
     }
 
     private void ClearFields()
@@ -813,22 +1040,38 @@ public partial class AcademicRecordsForm : Form
             }
             else
             {
-                cmbSchoolYear.SelectedIndex = -1;
-                cmbSemester.DataSource = null;
+                cmbSchoolYear.SelectedIndex =
+                    -1;
+
+                cmbSemester.DataSource =
+                    null;
+
                 cmbSemester.Items.Clear();
             }
 
             txtRemarks.Clear();
             txtSearch.Clear();
 
-            btnUpdate.Enabled = false;
-            btnDelete.Enabled = false;
+            btnUpdate.Enabled =
+                false;
 
-            dgvAcademicRecords.ClearSelection();
+            btnDelete.Enabled =
+                false;
+
+            dgvAcademicRecords
+                .ClearSelection();
         }
         finally
         {
-            _isLoadingRecord = false;
+            _isLoadingRecord =
+                false;
         }
+    }
+
+    private void btnBack_Click(
+        object? sender,
+        EventArgs e)
+    {
+        Close();
     }
 }

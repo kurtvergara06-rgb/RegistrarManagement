@@ -1,6 +1,7 @@
 using RegistrarManagement.Helpers;
 using RegistrarManagement.Models;
 using RegistrarManagement.Services;
+using System.Drawing.Drawing2D;
 
 namespace RegistrarManagement.Forms;
 
@@ -15,6 +16,17 @@ public partial class DocumentRequestsForm : Form
     public DocumentRequestsForm()
     {
         InitializeComponent();
+
+        Color maroon = Color.FromArgb(128, 0, 24);
+        Color red = Color.FromArgb(220, 53, 69);
+        Color gray = Color.FromArgb(180, 180, 180);
+
+        SetRoundedButton(btnAdd, 10, maroon);
+        SetRoundedButton(btnUpdate, 10, gray);
+        SetRoundedButton(btnDelete, 10, red);
+        SetRoundedButton(btnClear, 10, maroon);
+        SetRoundedButton(btnRefresh, 10, maroon);
+        SetRoundedButton(btnSearch, 8, maroon);
 
         Load += Form_Load;
 
@@ -46,6 +58,120 @@ public partial class DocumentRequestsForm : Form
         ]);
     }
 
+    private GraphicsPath GetRoundedPath(
+        Rectangle rectangle,
+        int radius)
+    {
+        GraphicsPath path = new GraphicsPath();
+
+        int diameter = radius * 2;
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Y,
+            diameter,
+            diameter,
+            180,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Y,
+            diameter,
+            diameter,
+            270,
+            90
+        );
+
+        path.AddArc(
+            rectangle.Right - diameter,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            0,
+            90
+        );
+
+        path.AddArc(
+            rectangle.X,
+            rectangle.Bottom - diameter,
+            diameter,
+            diameter,
+            90,
+            90
+        );
+
+        path.CloseFigure();
+
+        return path;
+    }
+
+    private void SetRoundedButton(
+        Button button,
+        int radius,
+        Color borderColor)
+    {
+        button.FlatStyle = FlatStyle.Flat;
+        button.FlatAppearance.BorderSize = 0;
+
+        void ApplyRegion()
+        {
+            Rectangle rectangle = new Rectangle(
+                0,
+                0,
+                button.Width,
+                button.Height
+            );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            button.Region?.Dispose();
+            button.Region =
+                new Region(path);
+        }
+
+        button.Paint += (sender, e) =>
+        {
+            e.Graphics.SmoothingMode =
+                SmoothingMode.AntiAlias;
+
+            Rectangle rectangle =
+                new Rectangle(
+                    1,
+                    1,
+                    button.Width - 3,
+                    button.Height - 3
+                );
+
+            using GraphicsPath path =
+                GetRoundedPath(
+                    rectangle,
+                    radius
+                );
+
+            using Pen pen =
+                new Pen(
+                    borderColor,
+                    1.5F
+                );
+
+            e.Graphics.DrawPath(
+                pen,
+                path
+            );
+        };
+
+        button.Resize +=
+            (sender, e) => ApplyRegion();
+
+        ApplyRegion();
+    }
+
     private async void Form_Load(
         object? sender,
         EventArgs e)
@@ -53,6 +179,7 @@ public partial class DocumentRequestsForm : Form
         try
         {
             ConfigureReleaseDate();
+
             await LoadStudentsAsync();
             await LoadGridAsync();
 
@@ -82,6 +209,7 @@ public partial class DocumentRequestsForm : Form
             await _students.GetAllAsync();
 
         cmbStudent.DataSource = students;
+
         cmbStudent.DisplayMember =
             nameof(Student.FullName);
 
@@ -188,12 +316,14 @@ public partial class DocumentRequestsForm : Form
         string status =
             cmbStatus.Text.Trim();
 
-        bool isReleased = status.Equals(
-            "Released",
-            StringComparison.OrdinalIgnoreCase
-        );
+        bool isReleased =
+            status.Equals(
+                "Released",
+                StringComparison.OrdinalIgnoreCase
+            );
 
-        dtpReleaseDate.Enabled = isReleased;
+        dtpReleaseDate.Enabled =
+            isReleased;
 
         if (isReleased)
         {
@@ -222,7 +352,10 @@ public partial class DocumentRequestsForm : Form
                     IdGenerator.Create("REQ")
                 );
 
-            await _service.SaveAsync(request);
+            await _service.SaveAsync(
+                request
+            );
+
             await LoadGridAsync();
 
             ClearFields();
@@ -269,9 +402,14 @@ public partial class DocumentRequestsForm : Form
         try
         {
             DocumentRequest request =
-                BuildRequest(_selectedRequestId);
+                BuildRequest(
+                    _selectedRequestId
+                );
 
-            await _service.SaveAsync(request);
+            await _service.SaveAsync(
+                request
+            );
+
             await LoadGridAsync();
 
             ClearFields();
@@ -310,12 +448,13 @@ public partial class DocumentRequestsForm : Form
             return;
         }
 
-        DialogResult result = MessageBox.Show(
-            "Delete the selected document request?",
-            "Confirm Delete",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Question
-        );
+        DialogResult result =
+            MessageBox.Show(
+                "Delete the selected document request?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
 
         if (result != DialogResult.Yes)
         {
@@ -329,6 +468,7 @@ public partial class DocumentRequestsForm : Form
             );
 
             await LoadGridAsync();
+
             ClearFields();
 
             MessageBox.Show(
@@ -392,12 +532,15 @@ public partial class DocumentRequestsForm : Form
             List<DocumentRequest> requests =
                 await _service.GetAllAsync();
 
-            if (string.IsNullOrWhiteSpace(searchText))
+            if (string.IsNullOrWhiteSpace(
+                searchText))
             {
                 dgvDocumentRequests.DataSource =
                     requests;
 
-                dgvDocumentRequests.ClearSelection();
+                dgvDocumentRequests
+                    .ClearSelection();
+
                 return;
             }
 
@@ -407,19 +550,23 @@ public partial class DocumentRequestsForm : Form
                         request.RequestId
                             .ToLowerInvariant()
                             .Contains(searchText)
+
                         || request.StudentId
                             .ToLowerInvariant()
                             .Contains(searchText)
+
                         || request.DocumentType
                             .ToLowerInvariant()
                             .Contains(searchText)
+
                         || request.Status
                             .ToLowerInvariant()
                             .Contains(searchText)
                     )
                     .ToList();
 
-            dgvDocumentRequests.ClearSelection();
+            dgvDocumentRequests
+                .ClearSelection();
         }
         catch (Exception ex)
         {
@@ -437,7 +584,8 @@ public partial class DocumentRequestsForm : Form
         dgvDocumentRequests.DataSource =
             await _service.GetAllAsync();
 
-        dgvDocumentRequests.ClearSelection();
+        dgvDocumentRequests
+            .ClearSelection();
     }
 
     private void dgvDocumentRequests_CellClick(
@@ -450,10 +598,12 @@ public partial class DocumentRequestsForm : Form
         }
 
         object? selectedItem =
-            dgvDocumentRequests.Rows[e.RowIndex]
+            dgvDocumentRequests
+                .Rows[e.RowIndex]
                 .DataBoundItem;
 
-        if (selectedItem is not DocumentRequest request)
+        if (selectedItem
+            is not DocumentRequest request)
         {
             return;
         }
@@ -465,7 +615,9 @@ public partial class DocumentRequestsForm : Form
             _selectedRequestId =
                 request.RequestId;
 
-            SelectStudent(request.StudentId);
+            SelectStudent(
+                request.StudentId
+            );
 
             cmbDocumentType.Text =
                 request.DocumentType;
@@ -494,7 +646,9 @@ public partial class DocumentRequestsForm : Form
             ))
             {
                 dtpReleaseDate.Checked = true;
-                dtpReleaseDate.Value = releaseDate;
+
+                dtpReleaseDate.Value =
+                    releaseDate;
             }
             else
             {
@@ -508,8 +662,6 @@ public partial class DocumentRequestsForm : Form
                     StringComparison.OrdinalIgnoreCase
                 );
 
-            // Prevent transferring a request
-            // to another student.
             cmbStudent.Enabled = false;
 
             btnUpdate.Enabled = true;
@@ -521,7 +673,8 @@ public partial class DocumentRequestsForm : Form
         }
     }
 
-    private void SelectStudent(string studentId)
+    private void SelectStudent(
+        string studentId)
     {
         cmbStudent.SelectedIndex = -1;
 
@@ -529,13 +682,16 @@ public partial class DocumentRequestsForm : Form
              index < cmbStudent.Items.Count;
              index++)
         {
-            if (cmbStudent.Items[index] is Student student
+            if (cmbStudent.Items[index]
+                    is Student student
                 && student.StudentId.Equals(
                     studentId,
                     StringComparison.OrdinalIgnoreCase
                 ))
             {
-                cmbStudent.SelectedIndex = index;
+                cmbStudent.SelectedIndex =
+                    index;
+
                 return;
             }
         }
@@ -550,6 +706,7 @@ public partial class DocumentRequestsForm : Form
             _selectedRequestId = null;
 
             cmbStudent.Enabled = true;
+
             cmbStudent.SelectedIndex = -1;
 
             cmbDocumentType.SelectedIndex = -1;
@@ -561,20 +718,37 @@ public partial class DocumentRequestsForm : Form
             txtRemarks.Clear();
             txtSearch.Clear();
 
-            dtpRequestDate.Value = DateTime.Now;
+            dtpRequestDate.Value =
+                DateTime.Now;
 
-            dtpReleaseDate.Checked = false;
-            dtpReleaseDate.Value = DateTime.Now;
-            dtpReleaseDate.Enabled = false;
+            dtpReleaseDate.Checked =
+                false;
 
-            btnUpdate.Enabled = false;
-            btnDelete.Enabled = false;
+            dtpReleaseDate.Value =
+                DateTime.Now;
 
-            dgvDocumentRequests.ClearSelection();
+            dtpReleaseDate.Enabled =
+                false;
+
+            btnUpdate.Enabled =
+                false;
+
+            btnDelete.Enabled =
+                false;
+
+            dgvDocumentRequests
+                .ClearSelection();
         }
         finally
         {
             _isLoadingRecord = false;
         }
+    }
+
+    private void btnBack_Click(
+        object? sender,
+        EventArgs e)
+    {
+        Close();
     }
 }
