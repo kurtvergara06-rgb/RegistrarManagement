@@ -23,12 +23,12 @@ public class ClearanceService
     // LIBRARY STATUS
     // ==========================================
 
-    public Task<LibraryClearance?> GetLibraryAsync(
-    string studentId)
+    public Task<LibraryClearance?> GetLibraryAsync(string studentId)
     {
         return _firebase.GetByIdAsync<LibraryClearance>(
             "library/clearanceStatuses",
-            studentId);
+            studentId
+        );
     }
 
     // ==========================================
