@@ -11,6 +11,10 @@ public partial class StudentClearancesForm : Form
     private readonly StudentService _students = new();
 
     private string? _id;
+    private bool _sortAscending = false;
+
+    private List<Student> _activeStudents = [];
+    private List<StudentClearance> _savedClearances = [];
 
     public StudentClearancesForm()
     {
@@ -18,7 +22,6 @@ public partial class StudentClearancesForm : Form
 
         Load += Form_Load;
 
-        // Registrar Status is automatic.
         cmbRegistrarStatus.Items.AddRange(new[]
         {
             "Cleared",
@@ -29,7 +32,6 @@ public partial class StudentClearancesForm : Form
 
         cmbRegistrarStatus.Enabled = false;
 
-        // Accounting Status is automatic.
         cmbAccountingStatus.Items.AddRange(new[]
         {
             "Cleared",
@@ -39,50 +41,33 @@ public partial class StudentClearancesForm : Form
 
         cmbAccountingStatus.Enabled = false;
 
-        // UI design
+        cmbfilter.Items.Clear();
+        cmbfilter.Items.AddRange(new[]
+        {
+            "All Statuses",
+            "Cleared",
+            "Pending",
+            "Not Cleared",
+            "No Record"
+        });
+        cmbfilter.SelectedIndex = 0;
+
+        btnsort.Text = "Sort: Z-A";
+        btnsort.Enabled = true;
+
         Color maroon = Color.FromArgb(128, 0, 24);
         Color red = Color.FromArgb(220, 53, 69);
         Color gray = Color.FromArgb(180, 180, 180);
 
-        SetRoundedButton(
-            btnCheckStatus,
-            8,
-            maroon);
-
-        SetRoundedButton(
-            btnAdd,
-            8,
-            maroon);
-
-        SetRoundedButton(
-            btnUpdate,
-            8,
-            gray);
-
-        SetRoundedButton(
-            btnDelete,
-            8,
-            red);
-
-        SetRoundedButton(
-            btnClear,
-            8,
-            maroon);
-
-        SetRoundedButton(
-            btnRefresh,
-            8,
-            maroon);
-
-        SetRoundedButton(
-            btnSearch,
-            8,
-            maroon);
+        SetRoundedButton(btnCheckStatus, 8, maroon);
+        SetRoundedButton(btnAdd, 8, maroon);
+        SetRoundedButton(btnUpdate, 8, gray);
+        SetRoundedButton(btnDelete, 8, red);
+        SetRoundedButton(btnClear, 8, maroon);
+        SetRoundedButton(btnRefresh, 8, maroon);
+        SetRoundedButton(btnSearch, 8, maroon);
+        SetRoundedButton(btnsort, 8, maroon);
     }
-
-    // ==========================================
-    // FORM LOAD
-    // ==========================================
 
     private async void Form_Load(
         object? sender,
@@ -91,10 +76,9 @@ public partial class StudentClearancesForm : Form
         try
         {
             await LoadStudents();
-
             ConfigureGrid();
-
-            await LoadGrid();
+            await ReloadAllDataAsync();
+            Clear();
         }
         catch (Exception ex)
         {
@@ -106,41 +90,36 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // LOAD STUDENTS
-    // ==========================================
+    private async Task ReloadAllDataAsync()
+    {
+        _savedClearances = await _service.GetAllAsync();
+        await LoadGridRowsAsync();
+    }
 
     private async Task LoadStudents()
     {
         List<Student> students =
             await _students.GetAllAsync();
 
-        cmbStudent.DataSource =
-            null;
-
-        cmbStudent.DataSource =
+        _activeStudents =
             students
                 .Where(x =>
                     x.Status.Equals(
                         "Active",
                         StringComparison.OrdinalIgnoreCase))
-                .OrderBy(x =>
-                    x.FullName)
+                .OrderBy(x => x.FullName)
                 .ToList();
 
-        cmbStudent.DisplayMember =
-            "FullName";
+        cmbStudent.DataSource = null;
+        cmbStudent.DataSource = _activeStudents;
+        cmbStudent.DisplayMember = "FullName";
+        cmbStudent.ValueMember = "StudentId";
+        cmbStudent.SelectedIndex = -1;
     }
-
-    // ==========================================
-    // CONFIGURE GRID
-    // ==========================================
 
     private void ConfigureGrid()
     {
-        dgvClearances.AutoGenerateColumns =
-            false;
-
+        dgvClearances.AutoGenerateColumns = false;
         dgvClearances.Columns.Clear();
 
         dgvClearances.Columns.Add(
@@ -157,6 +136,14 @@ public partial class StudentClearancesForm : Form
                 DataPropertyName = "StudentId",
                 HeaderText = "Student ID",
                 Name = "colStudentId"
+            });
+
+        dgvClearances.Columns.Add(
+            new DataGridViewTextBoxColumn
+            {
+                DataPropertyName = "StudentName",
+                HeaderText = "Student Name",
+                Name = "colStudentName"
             });
 
         dgvClearances.Columns.Add(
@@ -216,79 +203,111 @@ public partial class StudentClearancesForm : Form
             });
     }
 
-    // ==========================================
-    // CHECK SHARED STATUS
-    // ==========================================
+    private async Task LoadGridRowsAsync()
+    {
+        List<StudentClearanceGridRow> rows =
+            _activeStudents
+                .Select(student =>
+                {
+                    StudentClearance? clearance =
+                        _savedClearances.FirstOrDefault(x =>
+                            x.StudentId.Equals(
+                                student.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return new StudentClearanceGridRow
+                    {
+                        ClearanceId = clearance?.ClearanceId ?? "",
+                        StudentId = student.StudentId,
+                        StudentName = student.FullName,
+                        LibraryStatus = clearance?.LibraryStatus ?? "No Record",
+                        MedicalStatus = clearance?.MedicalStatus ?? "No Record",
+                        RegistrarStatus = clearance?.RegistrarStatus ?? "No Record",
+                        AccountingStatus = clearance?.AccountingStatus ?? "No Record",
+                        OverallStatus = clearance?.OverallStatus ?? "Pending",
+                        Remarks = clearance?.Remarks ?? "",
+                        UpdatedAt = clearance?.UpdatedAt ?? ""
+                    };
+                })
+                .ToList();
+
+        string searchText =
+            txtSearch.Text.Trim().ToLowerInvariant();
+
+        string selectedFilter =
+            cmbfilter.SelectedItem?.ToString()
+            ?? "All Statuses";
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            rows = rows
+                .Where(row =>
+                    row.StudentId.ToLowerInvariant().Contains(searchText)
+                    || row.StudentName.ToLowerInvariant().Contains(searchText)
+                    || row.ClearanceId.ToLowerInvariant().Contains(searchText)
+                    || row.OverallStatus.ToLowerInvariant().Contains(searchText))
+                .ToList();
+        }
+
+        if (!selectedFilter.Equals(
+                "All Statuses",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            rows = rows
+                .Where(row =>
+                    row.OverallStatus.Equals(
+                        selectedFilter,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        rows = _sortAscending
+            ? rows.OrderBy(row => row.StudentName).ToList()
+            : rows.OrderByDescending(row => row.StudentName).ToList();
+
+        dgvClearances.DataSource = null;
+        dgvClearances.DataSource = rows;
+
+        await Task.CompletedTask;
+    }
 
     private async void btnCheckStatus_Click(
         object? sender,
         EventArgs e)
     {
-        if (cmbStudent.SelectedItem
-            is not Student student)
+        if (cmbStudent.SelectedItem is not Student student)
         {
             MessageBox.Show(
                 "Please select a student.",
                 "Student Required",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-
             return;
         }
 
         try
         {
-            // --------------------------
-            // LIBRARY STATUS
-            // --------------------------
-
             var library =
-                await _service.GetLibraryAsync(
-                    student.StudentId);
+                await _service.GetLibraryAsync(student.StudentId);
 
             txtLibraryStatus.Text =
-                library?.LibraryStatus
-                ?? "No Record";
-
-            // --------------------------
-            // MEDICAL STATUS
-            // --------------------------
+                library?.LibraryStatus ?? "No Record";
 
             var medical =
-                await _service.GetMedicalAsync(
-                    student.StudentId);
+                await _service.GetMedicalAsync(student.StudentId);
 
             txtMedicalStatus.Text =
-                medical?.MedicalStatus
-                ?? "No Record";
-
-            // --------------------------
-            // REGISTRAR STATUS
-            // Automatically computed.
-            // --------------------------
+                medical?.MedicalStatus ?? "No Record";
 
             string registrarStatus =
-                await _service.GetRegistrarStatusAsync(
-                    student.StudentId);
+                await _service.GetRegistrarStatusAsync(student.StudentId);
 
-            cmbRegistrarStatus.SelectedItem =
-                registrarStatus;
-
-            // --------------------------
-            // ACCOUNTING STATUS
-            // Automatically computed.
-            // --------------------------
+            cmbRegistrarStatus.SelectedItem = registrarStatus;
 
             string accountingStatus =
-                await _service.GetAccountingStatusAsync(
-                    student.StudentId);
+                await _service.GetAccountingStatusAsync(student.StudentId);
 
-            cmbAccountingStatus.SelectedItem =
-                accountingStatus;
-
-            // --------------------------
-            // OVERALL STATUS
-            // --------------------------
+            cmbAccountingStatus.SelectedItem = accountingStatus;
 
             UpdateOverallStatus();
         }
@@ -302,47 +321,24 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // BUILD CLEARANCE
-    // ==========================================
-
-    private StudentClearance Build(
-        string id)
+    private StudentClearance Build(string id)
     {
         StudentClearance clearance =
             new StudentClearance
             {
-                ClearanceId =
-                    id,
-
+                ClearanceId = id,
                 StudentId =
-                    (cmbStudent.SelectedItem as Student)
-                        ?.StudentId
-                    ?? "",
-
-                LibraryStatus =
-                    txtLibraryStatus.Text.Trim(),
-
-                MedicalStatus =
-                    txtMedicalStatus.Text.Trim(),
-
-                RegistrarStatus =
-                    cmbRegistrarStatus.Text,
-
-                AccountingStatus =
-                    cmbAccountingStatus.Text,
-
-                Remarks =
-                    txtRemarks.Text.Trim(),
-
-                UpdatedAt =
-                    DateTime.Now.ToString(
-                        "yyyy-MM-dd HH:mm:ss")
+                    (cmbStudent.SelectedItem as Student)?.StudentId ?? "",
+                LibraryStatus = txtLibraryStatus.Text.Trim(),
+                MedicalStatus = txtMedicalStatus.Text.Trim(),
+                RegistrarStatus = cmbRegistrarStatus.Text,
+                AccountingStatus = cmbAccountingStatus.Text,
+                Remarks = txtRemarks.Text.Trim(),
+                UpdatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
         clearance.OverallStatus =
-            ClearanceService.Overall(
-                clearance);
+            ClearanceService.Overall(clearance);
 
         txtOverallStatus.Text =
             clearance.OverallStatus;
@@ -350,78 +346,52 @@ public partial class StudentClearancesForm : Form
         return clearance;
     }
 
-    // ==========================================
-    // UPDATE OVERALL STATUS
-    // ==========================================
-
     private void UpdateOverallStatus()
     {
         StudentClearance clearance =
             new StudentClearance
             {
-                LibraryStatus =
-                    txtLibraryStatus.Text.Trim(),
-
-                MedicalStatus =
-                    txtMedicalStatus.Text.Trim(),
-
-                RegistrarStatus =
-                    cmbRegistrarStatus.Text,
-
-                AccountingStatus =
-                    cmbAccountingStatus.Text
+                LibraryStatus = txtLibraryStatus.Text.Trim(),
+                MedicalStatus = txtMedicalStatus.Text.Trim(),
+                RegistrarStatus = cmbRegistrarStatus.Text,
+                AccountingStatus = cmbAccountingStatus.Text
             };
 
         txtOverallStatus.Text =
-            ClearanceService.Overall(
-                clearance);
+            ClearanceService.Overall(clearance);
     }
-
-    // ==========================================
-    // ADD
-    // ==========================================
 
     private async void btnAdd_Click(
         object? sender,
         EventArgs e)
     {
-        if (cmbStudent.SelectedItem
-            is not Student student)
+        if (cmbStudent.SelectedItem is not Student student)
         {
             MessageBox.Show(
                 "Please select a student.",
                 "Student Required",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(
-                txtLibraryStatus.Text) ||
-            string.IsNullOrWhiteSpace(
-                txtMedicalStatus.Text) ||
-            string.IsNullOrWhiteSpace(
-                cmbRegistrarStatus.Text) ||
-            string.IsNullOrWhiteSpace(
-                cmbAccountingStatus.Text))
+        if (string.IsNullOrWhiteSpace(txtLibraryStatus.Text) ||
+            string.IsNullOrWhiteSpace(txtMedicalStatus.Text) ||
+            string.IsNullOrWhiteSpace(cmbRegistrarStatus.Text) ||
+            string.IsNullOrWhiteSpace(cmbAccountingStatus.Text))
         {
             MessageBox.Show(
                 "Please click Check Shared Status first.",
                 "Check Status Required",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
-
             return;
         }
 
         try
         {
-            List<StudentClearance> existingRecords =
-                await _service.GetAllAsync();
-
             bool alreadyExists =
-                existingRecords.Any(x =>
+                _savedClearances.Any(x =>
                     x.StudentId.Equals(
                         student.StudentId,
                         StringComparison.OrdinalIgnoreCase));
@@ -429,28 +399,35 @@ public partial class StudentClearancesForm : Form
             if (alreadyExists)
             {
                 MessageBox.Show(
-                    "A clearance record already exists for this student.",
+                    "A clearance record already exists for this student. Please use Update instead.",
                     "Duplicate Record",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning);
+                return;
+            }
 
+            DialogResult addConfirm =
+                MessageBox.Show(
+                    "Save this clearance record?",
+                    "Confirm Add",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+            if (addConfirm != DialogResult.Yes)
+            {
                 return;
             }
 
             string newId =
                 IdGenerator.CreateNext(
                     "CLR",
-                    existingRecords.Select(
-                        x => x.ClearanceId));
+                    _savedClearances.Select(x => x.ClearanceId));
 
-            StudentClearance clearance =
-                Build(newId);
+            StudentClearance clearance = Build(newId);
 
-            await _service.SaveAsync(
-                clearance);
+            await _service.SaveAsync(clearance);
 
-            await LoadGrid();
-
+            await ReloadAllDataAsync();
             Clear();
 
             MessageBox.Show(
@@ -469,28 +446,38 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // UPDATE
-    // ==========================================
-
     private async void btnUpdate_Click(
         object? sender,
         EventArgs e)
     {
         if (_id == null)
         {
+            MessageBox.Show(
+                "Please select an existing clearance row first.",
+                "Update",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
             return;
         }
 
         try
         {
-            StudentClearance clearance =
-                Build(_id);
+            DialogResult updateConfirm =
+                MessageBox.Show(
+                    "Update this clearance record?",
+                    "Confirm Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
 
-            await _service.SaveAsync(
-                clearance);
+            if (updateConfirm != DialogResult.Yes)
+            {
+                return;
+            }
 
-            await LoadGrid();
+            StudentClearance clearance = Build(_id);
+
+            await _service.SaveAsync(clearance);
+            await ReloadAllDataAsync();
 
             MessageBox.Show(
                 "Clearance record updated successfully.",
@@ -508,16 +495,17 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // DELETE
-    // ==========================================
-
     private async void btnDelete_Click(
         object? sender,
         EventArgs e)
     {
         if (_id == null)
         {
+            MessageBox.Show(
+                "Please select an existing clearance row first.",
+                "Delete",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
             return;
         }
 
@@ -535,11 +523,9 @@ public partial class StudentClearancesForm : Form
 
         try
         {
-            await _service.DeleteAsync(
-                _id);
+            await _service.DeleteAsync(_id);
 
-            await LoadGrid();
-
+            await ReloadAllDataAsync();
             Clear();
 
             MessageBox.Show(
@@ -558,20 +544,12 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // CLEAR
-    // ==========================================
-
     private void btnClear_Click(
         object? sender,
         EventArgs e)
     {
         Clear();
     }
-
-    // ==========================================
-    // REFRESH
-    // ==========================================
 
     private async void btnRefresh_Click(
         object? sender,
@@ -580,8 +558,11 @@ public partial class StudentClearancesForm : Form
         try
         {
             await LoadStudents();
+            await ReloadAllDataAsync();
 
-            await LoadGrid();
+            cmbfilter.SelectedIndex = 0;
+            _sortAscending = false;
+            btnsort.Text = "Sort: Z-A";
 
             Clear();
         }
@@ -595,43 +576,13 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // SEARCH
-    // ==========================================
-
     private async void btnSearch_Click(
         object? sender,
         EventArgs e)
     {
         try
         {
-            string search =
-                txtSearch.Text
-                    .Trim()
-                    .ToLowerInvariant();
-
-            List<StudentClearance> records =
-                await _service.GetAllAsync();
-
-            if (string.IsNullOrWhiteSpace(search))
-            {
-                dgvClearances.DataSource =
-                    records;
-
-                return;
-            }
-
-            dgvClearances.DataSource =
-                records
-                    .Where(x =>
-                        x.ClearanceId
-                            .ToLowerInvariant()
-                            .Contains(search)
-                        ||
-                        x.StudentId
-                            .ToLowerInvariant()
-                            .Contains(search))
-                    .ToList();
+            await LoadGridRowsAsync();
         }
         catch (Exception ex)
         {
@@ -643,22 +594,10 @@ public partial class StudentClearancesForm : Form
         }
     }
 
-    // ==========================================
-    // LOAD GRID
-    // ==========================================
-
     private async Task LoadGrid()
     {
-        dgvClearances.DataSource =
-            null;
-
-        dgvClearances.DataSource =
-            await _service.GetAllAsync();
+        await LoadGridRowsAsync();
     }
-
-    // ==========================================
-    // GRID CLICK
-    // ==========================================
 
     private void dgvClearances_CellClick(
         object? sender,
@@ -669,108 +608,82 @@ public partial class StudentClearancesForm : Form
             return;
         }
 
-        if (dgvClearances
-                .Rows[e.RowIndex]
-                .DataBoundItem
-            is not StudentClearance clearance)
+        if (dgvClearances.Rows[e.RowIndex].DataBoundItem
+            is not StudentClearanceGridRow row)
         {
             return;
         }
 
-        _id =
-            clearance.ClearanceId;
+        SelectStudent(row.StudentId);
 
-        txtLibraryStatus.Text =
-            clearance.LibraryStatus;
+        StudentClearance? existing =
+            _savedClearances.FirstOrDefault(x =>
+                x.StudentId.Equals(
+                    row.StudentId,
+                    StringComparison.OrdinalIgnoreCase));
 
-        txtMedicalStatus.Text =
-            clearance.MedicalStatus;
+        if (existing == null)
+        {
+            _id = null;
 
-        cmbRegistrarStatus.Text =
-            clearance.RegistrarStatus;
+            txtLibraryStatus.Text = "No Record";
+            txtMedicalStatus.Text = "No Record";
+            cmbRegistrarStatus.Text = "No Record";
+            cmbAccountingStatus.Text = "No Record";
+            txtOverallStatus.Text = "Pending";
+            txtRemarks.Clear();
 
-        cmbAccountingStatus.Text =
-            clearance.AccountingStatus;
+            btnUpdate.Enabled = false;
+            btnDelete.Enabled = false;
+        }
+        else
+        {
+            _id = existing.ClearanceId;
 
-        txtOverallStatus.Text =
-            clearance.OverallStatus;
+            txtLibraryStatus.Text = existing.LibraryStatus;
+            txtMedicalStatus.Text = existing.MedicalStatus;
+            cmbRegistrarStatus.Text = existing.RegistrarStatus;
+            cmbAccountingStatus.Text = existing.AccountingStatus;
+            txtOverallStatus.Text = existing.OverallStatus;
+            txtRemarks.Text = existing.Remarks;
 
-        txtRemarks.Text =
-            clearance.Remarks;
+            btnUpdate.Enabled = true;
+            btnDelete.Enabled = true;
+        }
 
-        SelectStudent(
-            clearance.StudentId);
-
-        cmbStudent.Enabled =
-            false;
-
-        btnUpdate.Enabled =
-            true;
-
-        btnDelete.Enabled =
-            true;
+        cmbStudent.Enabled = true;
     }
 
-    // ==========================================
-    // SELECT STUDENT
-    // ==========================================
-
-    private void SelectStudent(
-        string studentId)
+    private void SelectStudent(string studentId)
     {
-        for (int i = 0;
-             i < cmbStudent.Items.Count;
-             i++)
+        for (int i = 0; i < cmbStudent.Items.Count; i++)
         {
-            if ((cmbStudent.Items[i]
-                    as Student)
-                    ?.StudentId
-                == studentId)
+            if ((cmbStudent.Items[i] as Student)?.StudentId == studentId)
             {
-                cmbStudent.SelectedIndex =
-                    i;
-
+                cmbStudent.SelectedIndex = i;
                 break;
             }
         }
     }
 
-    // ==========================================
-    // RESET FORM
-    // ==========================================
-
     private void Clear()
     {
-        _id =
-            null;
+        _id = null;
 
         txtLibraryStatus.Clear();
-
         txtMedicalStatus.Clear();
-
         txtOverallStatus.Clear();
-
         txtRemarks.Clear();
 
-        cmbRegistrarStatus.SelectedIndex =
-            -1;
+        cmbRegistrarStatus.SelectedIndex = -1;
+        cmbAccountingStatus.SelectedIndex = -1;
 
-        cmbAccountingStatus.SelectedIndex =
-            -1;
+        cmbStudent.Enabled = true;
+        cmbStudent.SelectedIndex = -1;
 
-        cmbStudent.Enabled =
-            true;
-
-        btnUpdate.Enabled =
-            false;
-
-        btnDelete.Enabled =
-            false;
+        btnUpdate.Enabled = false;
+        btnDelete.Enabled = false;
     }
-
-    // ==========================================
-    // BACK
-    // ==========================================
 
     private void btnBack_Click(
         object? sender,
@@ -779,51 +692,18 @@ public partial class StudentClearancesForm : Form
         Close();
     }
 
-    // ==========================================
-    // ROUNDED BUTTON DESIGN
-    // ==========================================
-
     private GraphicsPath GetRoundedPath(
         Rectangle rectangle,
         int radius)
     {
-        GraphicsPath path =
-            new GraphicsPath();
+        GraphicsPath path = new GraphicsPath();
 
-        int diameter =
-            radius * 2;
+        int diameter = radius * 2;
 
-        path.AddArc(
-            rectangle.X,
-            rectangle.Y,
-            diameter,
-            diameter,
-            180,
-            90);
-
-        path.AddArc(
-            rectangle.Right - diameter,
-            rectangle.Y,
-            diameter,
-            diameter,
-            270,
-            90);
-
-        path.AddArc(
-            rectangle.Right - diameter,
-            rectangle.Bottom - diameter,
-            diameter,
-            diameter,
-            0,
-            90);
-
-        path.AddArc(
-            rectangle.X,
-            rectangle.Bottom - diameter,
-            diameter,
-            diameter,
-            90,
-            90);
+        path.AddArc(rectangle.X, rectangle.Y, diameter, diameter, 180, 90);
+        path.AddArc(rectangle.Right - diameter, rectangle.Y, diameter, diameter, 270, 90);
+        path.AddArc(rectangle.Right - diameter, rectangle.Bottom - diameter, diameter, diameter, 0, 90);
+        path.AddArc(rectangle.X, rectangle.Bottom - diameter, diameter, diameter, 90, 90);
 
         path.CloseFigure();
 
@@ -835,11 +715,8 @@ public partial class StudentClearancesForm : Form
         int radius,
         Color borderColor)
     {
-        button.FlatStyle =
-            FlatStyle.Flat;
-
-        button.FlatAppearance.BorderSize =
-            0;
+        button.FlatStyle = FlatStyle.Flat;
+        button.FlatAppearance.BorderSize = 0;
 
         void ApplyRegion()
         {
@@ -851,14 +728,10 @@ public partial class StudentClearancesForm : Form
                     button.Height);
 
             using GraphicsPath path =
-                GetRoundedPath(
-                    rectangle,
-                    radius);
+                GetRoundedPath(rectangle, radius);
 
             button.Region?.Dispose();
-
-            button.Region =
-                new Region(path);
+            button.Region = new Region(path);
         }
 
         button.Paint +=
@@ -875,24 +748,51 @@ public partial class StudentClearancesForm : Form
                         button.Height - 3);
 
                 using GraphicsPath path =
-                    GetRoundedPath(
-                        rectangle,
-                        radius);
+                    GetRoundedPath(rectangle, radius);
 
                 using Pen pen =
-                    new Pen(
-                        borderColor,
-                        1.5F);
+                    new Pen(borderColor, 1.5F);
 
-                e.Graphics.DrawPath(
-                    pen,
-                    path);
+                e.Graphics.DrawPath(pen, path);
             };
 
         button.Resize +=
-            (sender, e) =>
-                ApplyRegion();
+            (sender, e) => ApplyRegion();
 
         ApplyRegion();
+    }
+
+    private async void btnsort_Click(object sender, EventArgs e)
+    {
+        _sortAscending = !_sortAscending;
+
+        btnsort.Text = _sortAscending
+            ? "Sort: A-Z"
+            : "Sort: Z-A";
+
+        await LoadGridRowsAsync();
+    }
+
+    private async void cmbfilter_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        await LoadGridRowsAsync();
+    }
+
+    private sealed class StudentClearanceGridRow
+    {
+        public string ClearanceId { get; set; } = "";
+        public string StudentId { get; set; } = "";
+        public string StudentName { get; set; } = "";
+        public string LibraryStatus { get; set; } = "";
+        public string MedicalStatus { get; set; } = "";
+        public string RegistrarStatus { get; set; } = "";
+        public string AccountingStatus { get; set; } = "";
+        public string OverallStatus { get; set; } = "";
+        public string Remarks { get; set; } = "";
+        public string UpdatedAt { get; set; } = "";
+    }
+
+    private void pnlFormCard_Paint(object sender, PaintEventArgs e)
+    {
     }
 }

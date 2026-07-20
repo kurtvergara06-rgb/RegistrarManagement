@@ -16,6 +16,7 @@ public partial class AcademicRecordsForm : Form
 
     private string? _selectedRecordId;
     private bool _isLoadingRecord;
+    private bool _sortAscending = false;
 
     public AcademicRecordsForm()
     {
@@ -31,8 +32,8 @@ public partial class AcademicRecordsForm : Form
         SetRoundedButton(btnClear, 10, maroon);
         SetRoundedButton(btnRefresh, 10, maroon);
         SetRoundedButton(btnSearch, 8, maroon);
+        SetRoundedButton(btnsort, 8, maroon);
 
-        // Program comes from the selected student's Firebase record.
         cmbProgram.Enabled = false;
 
         Load += Form_Load;
@@ -60,6 +61,22 @@ public partial class AcademicRecordsForm : Form
             "Graduated",
             "Inactive"
         ]);
+
+        cmbfilter.Items.Clear();
+        cmbfilter.Items.AddRange(
+        [
+            "All Statuses",
+            "Regular",
+            "Irregular",
+            "Probation",
+            "Graduating",
+            "Graduated",
+            "Inactive"
+        ]);
+        cmbfilter.SelectedIndex = 0;
+
+        btnsort.Enabled = true;
+        btnsort.Text = "Sort: Z-A";
     }
 
     private GraphicsPath GetRoundedPath(
@@ -356,13 +373,11 @@ public partial class AcademicRecordsForm : Form
         {
             "1st" => "1st Semester",
             "first" => "1st Semester",
-            "1st semester" =>
-                "1st Semester",
+            "1st semester" => "1st Semester",
 
             "2nd" => "2nd Semester",
             "second" => "2nd Semester",
-            "2nd semester" =>
-                "2nd Semester",
+            "2nd semester" => "2nd Semester",
 
             "summer" => "Summer",
 
@@ -378,18 +393,10 @@ public partial class AcademicRecordsForm : Form
 
         return value switch
         {
-            "1" or "1.0" =>
-                "1st Year",
-
-            "2" or "2.0" =>
-                "2nd Year",
-
-            "3" or "3.0" =>
-                "3rd Year",
-
-            "4" or "4.0" =>
-                "4th Year",
-
+            "1" or "1.0" => "1st Year",
+            "2" or "2.0" => "2nd Year",
+            "3" or "3.0" => "3rd Year",
+            "4" or "4.0" => "4th Year",
             _ => value
         };
     }
@@ -500,8 +507,7 @@ public partial class AcademicRecordsForm : Form
             );
     }
 
-    private async Task<bool>
-        HasValidRegistrationAsync()
+    private async Task<bool> HasValidRegistrationAsync()
     {
         if (cmbStudent.SelectedItem
             is not Student student)
@@ -515,10 +521,8 @@ public partial class AcademicRecordsForm : Form
         string selectedSemester =
             cmbSemester.Text.Trim();
 
-        List<StudentRegistration>
-            registrations =
-                await _registrations
-                    .GetAllAsync();
+        List<StudentRegistration> registrations =
+            await _registrations.GetAllAsync();
 
         return registrations.Any(
             registration =>
@@ -541,6 +545,101 @@ public partial class AcademicRecordsForm : Form
                         StringComparison.OrdinalIgnoreCase
                     )
         );
+    }
+
+    private async Task ApplySearchSortAndFilterAsync()
+    {
+        List<AcademicRecord> records =
+            await _service.GetAllAsync();
+
+        List<Student> students =
+            await _students.GetAllAsync();
+
+        string searchText =
+            txtSearch.Text
+                .Trim()
+                .ToLowerInvariant();
+
+        string selectedStatus =
+            cmbfilter.SelectedItem?.ToString()
+            ?? "All Statuses";
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            records = records
+                .Where(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    string studentName =
+                        matchedStudent?.FullName
+                            ?.ToLowerInvariant()
+                        ?? string.Empty;
+
+                    return
+                        record.RecordId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.StudentId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.SchoolYear
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.AcademicStatus
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || studentName.Contains(searchText);
+                })
+                .ToList();
+        }
+
+        if (!selectedStatus.Equals(
+                "All Statuses",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            records = records
+                .Where(record =>
+                    record.AcademicStatus.Equals(
+                        selectedStatus,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        records = _sortAscending
+            ? records
+                .OrderBy(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList()
+            : records
+                .OrderByDescending(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList();
+
+        dgvAcademicRecords.DataSource = records;
+        dgvAcademicRecords.ClearSelection();
     }
 
     private async void btnAdd_Click(
@@ -578,7 +677,7 @@ public partial class AcademicRecordsForm : Form
             }
 
             List<AcademicRecord> existingRecords =
-              await _service.GetAllAsync();
+                await _service.GetAllAsync();
 
             AcademicRecord record =
                 BuildRecord(
@@ -618,12 +717,21 @@ public partial class AcademicRecordsForm : Form
                 return;
             }
 
-            await _service.SaveAsync(
-                record
-            );
+            DialogResult addConfirm =
+                MessageBox.Show(
+                    "Save this academic record?",
+                    "Confirm Add",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
+            if (addConfirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            await _service.SaveAsync(record);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -691,16 +799,23 @@ public partial class AcademicRecordsForm : Form
             }
 
             AcademicRecord record =
-                BuildRecord(
-                    _selectedRecordId
+                BuildRecord(_selectedRecordId);
+
+            DialogResult updateConfirm =
+                MessageBox.Show(
+                    "Update this academic record?",
+                    "Confirm Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
                 );
 
-            await _service.SaveAsync(
-                record
-            );
+            if (updateConfirm != DialogResult.Yes)
+            {
+                return;
+            }
 
+            await _service.SaveAsync(record);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -752,12 +867,8 @@ public partial class AcademicRecordsForm : Form
 
         try
         {
-            await _service.DeleteAsync(
-                _selectedRecordId
-            );
-
+            await _service.DeleteAsync(_selectedRecordId);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -797,6 +908,10 @@ public partial class AcademicRecordsForm : Form
             await LoadGridAsync();
 
             ClearFields();
+
+            cmbfilter.SelectedIndex = 0;
+            _sortAscending = false;
+            btnsort.Text = "Sort: Z-A";
         }
         catch (Exception ex)
         {
@@ -815,46 +930,7 @@ public partial class AcademicRecordsForm : Form
     {
         try
         {
-            string searchText =
-                txtSearch.Text
-                    .Trim()
-                    .ToLowerInvariant();
-
-            List<AcademicRecord> records =
-                await _service.GetAllAsync();
-
-            if (string.IsNullOrWhiteSpace(
-                searchText))
-            {
-                dgvAcademicRecords.DataSource =
-                    records;
-
-                dgvAcademicRecords
-                    .ClearSelection();
-
-                return;
-            }
-
-            dgvAcademicRecords.DataSource =
-                records
-                    .Where(record =>
-                        record.RecordId
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-                        || record.StudentId
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-                        || record.SchoolYear
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-                        || record.AcademicStatus
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-                    )
-                    .ToList();
-
-            dgvAcademicRecords
-                .ClearSelection();
+            await ApplySearchSortAndFilterAsync();
         }
         catch (Exception ex)
         {
@@ -902,21 +978,11 @@ public partial class AcademicRecordsForm : Form
             _selectedRecordId =
                 record.RecordId;
 
-            SelectStudent(
-                record.StudentId
-            );
+            SelectStudent(record.StudentId);
+            SelectProgram(record.ProgramId);
+            SelectSchoolYear(record.SchoolYear);
 
-            SelectProgram(
-                record.ProgramId
-            );
-
-            SelectSchoolYear(
-                record.SchoolYear
-            );
-
-            LoadSemestersForSchoolYear(
-                record.SchoolYear
-            );
+            LoadSemestersForSchoolYear(record.SchoolYear);
 
             cmbSemester.Text =
                 record.Semester;
@@ -930,19 +996,13 @@ public partial class AcademicRecordsForm : Form
             txtRemarks.Text =
                 record.Remarks;
 
-            cmbStudent.Enabled =
-                false;
-
-            btnUpdate.Enabled =
-                true;
-
-            btnDelete.Enabled =
-                true;
+            cmbStudent.Enabled = false;
+            btnUpdate.Enabled = true;
+            btnDelete.Enabled = true;
         }
         finally
         {
-            _isLoadingRecord =
-                false;
+            _isLoadingRecord = false;
         }
     }
 
@@ -962,9 +1022,7 @@ public partial class AcademicRecordsForm : Form
                     StringComparison.OrdinalIgnoreCase
                 ))
             {
-                cmbStudent.SelectedIndex =
-                    index;
-
+                cmbStudent.SelectedIndex = index;
                 return;
             }
         }
@@ -973,8 +1031,7 @@ public partial class AcademicRecordsForm : Form
     private void SelectSchoolYear(
         string schoolYear)
     {
-        cmbSchoolYear.SelectedIndex =
-            -1;
+        cmbSchoolYear.SelectedIndex = -1;
 
         for (int index = 0;
              index < cmbSchoolYear.Items.Count;
@@ -990,9 +1047,7 @@ public partial class AcademicRecordsForm : Form
                 StringComparison.OrdinalIgnoreCase
             ))
             {
-                cmbSchoolYear.SelectedIndex =
-                    index;
-
+                cmbSchoolYear.SelectedIndex = index;
                 return;
             }
         }
@@ -1007,8 +1062,7 @@ public partial class AcademicRecordsForm : Form
         btnUpdate.Enabled = false;
         btnDelete.Enabled = false;
 
-        dgvAcademicRecords
-            .ClearSelection();
+        dgvAcademicRecords.ClearSelection();
     }
 
     private void ClearFields()
@@ -1035,37 +1089,26 @@ public partial class AcademicRecordsForm : Form
                         ?.ToString()
                     ?? string.Empty;
 
-                LoadSemestersForSchoolYear(
-                    schoolYear
-                );
+                LoadSemestersForSchoolYear(schoolYear);
             }
             else
             {
-                cmbSchoolYear.SelectedIndex =
-                    -1;
-
-                cmbSemester.DataSource =
-                    null;
-
+                cmbSchoolYear.SelectedIndex = -1;
+                cmbSemester.DataSource = null;
                 cmbSemester.Items.Clear();
             }
 
             txtRemarks.Clear();
             txtSearch.Clear();
 
-            btnUpdate.Enabled =
-                false;
+            btnUpdate.Enabled = false;
+            btnDelete.Enabled = false;
 
-            btnDelete.Enabled =
-                false;
-
-            dgvAcademicRecords
-                .ClearSelection();
+            dgvAcademicRecords.ClearSelection();
         }
         finally
         {
-            _isLoadingRecord =
-                false;
+            _isLoadingRecord = false;
         }
     }
 
@@ -1074,5 +1117,31 @@ public partial class AcademicRecordsForm : Form
         EventArgs e)
     {
         Close();
+    }
+
+    private async void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        await ApplySearchSortAndFilterAsync();
+    }
+
+    private async void cmbfilter_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (_isLoadingRecord)
+        {
+            return;
+        }
+
+        await ApplySearchSortAndFilterAsync();
+    }
+
+    private async void btnsort_Click(object sender, EventArgs e)
+    {
+        _sortAscending = !_sortAscending;
+
+        btnsort.Text = _sortAscending
+            ? "Sort: A-Z"
+            : "Sort: Z-A";
+
+        await ApplySearchSortAndFilterAsync();
     }
 }

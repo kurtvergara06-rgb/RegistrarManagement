@@ -60,9 +60,9 @@ partial class AcademicRecordsForm
 
     private void InitializeComponent()
     {
-        DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
         pnlHeader = new Panel();
         btnBack = new Button();
         picLogo = new PictureBox();
@@ -94,6 +94,8 @@ partial class AcademicRecordsForm
         btnSearch = new Button();
         dgvAcademicRecords = new DataGridView();
         lblFooter = new Label();
+        cmbfilter = new ComboBox();
+        btnsort = new Button();
         pnlHeader.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
         pnlFormCard.SuspendLayout();
@@ -430,26 +432,26 @@ partial class AcademicRecordsForm
         dgvAcademicRecords.AllowUserToAddRows = false;
         dgvAcademicRecords.AllowUserToDeleteRows = false;
         dgvAcademicRecords.AllowUserToResizeRows = false;
-        dataGridViewCellStyle1.BackColor = Color.FromArgb(248, 248, 248);
-        dgvAcademicRecords.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle1;
+        dataGridViewCellStyle4.BackColor = Color.FromArgb(248, 248, 248);
+        dgvAcademicRecords.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
         dgvAcademicRecords.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgvAcademicRecords.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         dgvAcademicRecords.BackgroundColor = Color.White;
         dgvAcademicRecords.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-        dataGridViewCellStyle2.BackColor = Color.FromArgb(128, 0, 24);
-        dataGridViewCellStyle2.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-        dataGridViewCellStyle2.ForeColor = Color.White;
-        dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(128, 0, 24);
-        dgvAcademicRecords.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+        dataGridViewCellStyle5.BackColor = Color.FromArgb(128, 0, 24);
+        dataGridViewCellStyle5.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+        dataGridViewCellStyle5.ForeColor = Color.White;
+        dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(128, 0, 24);
+        dgvAcademicRecords.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
         dgvAcademicRecords.ColumnHeadersHeight = 34;
-        dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle3.BackColor = Color.White;
-        dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
-        dataGridViewCellStyle3.ForeColor = Color.Black;
-        dataGridViewCellStyle3.SelectionBackColor = Color.FromArgb(235, 205, 210);
-        dataGridViewCellStyle3.SelectionForeColor = Color.Black;
-        dataGridViewCellStyle3.WrapMode = DataGridViewTriState.False;
-        dgvAcademicRecords.DefaultCellStyle = dataGridViewCellStyle3;
+        dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle6.BackColor = Color.White;
+        dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
+        dataGridViewCellStyle6.ForeColor = Color.Black;
+        dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(235, 205, 210);
+        dataGridViewCellStyle6.SelectionForeColor = Color.Black;
+        dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
+        dgvAcademicRecords.DefaultCellStyle = dataGridViewCellStyle6;
         dgvAcademicRecords.EnableHeadersVisualStyles = false;
         dgvAcademicRecords.GridColor = Color.FromArgb(220, 220, 220);
         dgvAcademicRecords.Location = new Point(28, 480);
@@ -475,12 +477,37 @@ partial class AcademicRecordsForm
         lblFooter.TabIndex = 0;
         lblFooter.Text = "© 2026 Batangas State University";
         // 
+        // cmbfilter
+        // 
+        cmbfilter.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbfilter.Location = new Point(662, 361);
+        cmbfilter.Name = "cmbfilter";
+        cmbfilter.Size = new Size(133, 23);
+        cmbfilter.TabIndex = 12;
+        cmbfilter.SelectedIndexChanged += cmbfilter_SelectedIndexChanged;
+        // 
+        // btnsort
+        // 
+        btnsort.BackColor = Color.WhiteSmoke;
+        btnsort.Enabled = false;
+        btnsort.FlatStyle = FlatStyle.Flat;
+        btnsort.Font = new Font("Segoe UI Semibold", 10F);
+        btnsort.Location = new Point(817, 350);
+        btnsort.Name = "btnsort";
+        btnsort.Size = new Size(93, 40);
+        btnsort.TabIndex = 13;
+        btnsort.Text = "Sort ";
+        btnsort.UseVisualStyleBackColor = false;
+        btnsort.Click += btnsort_Click;
+        // 
         // AcademicRecordsForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(245, 245, 245);
         ClientSize = new Size(1180, 720);
+        Controls.Add(btnsort);
+        Controls.Add(cmbfilter);
         Controls.Add(lblFooter);
         Controls.Add(dgvAcademicRecords);
         Controls.Add(pnlSearch);
@@ -507,4 +534,6 @@ partial class AcademicRecordsForm
         ResumeLayout(false);
         PerformLayout();
     }
+    private ComboBox cmbfilter;
+    private Button btnsort;
 }

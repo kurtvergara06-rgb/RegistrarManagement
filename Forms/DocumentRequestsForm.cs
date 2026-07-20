@@ -12,6 +12,7 @@ public partial class DocumentRequestsForm : Form
 
     private string? _selectedRequestId;
     private bool _isLoadingRecord;
+    private bool _sortAscending = false;
 
     public DocumentRequestsForm()
     {
@@ -27,6 +28,13 @@ public partial class DocumentRequestsForm : Form
         SetRoundedButton(btnClear, 10, maroon);
         SetRoundedButton(btnRefresh, 10, maroon);
         SetRoundedButton(btnSearch, 8, maroon);
+
+        if (btnsort != null)
+        {
+            SetRoundedButton(btnsort, 8, maroon);
+            btnsort.Enabled = true;
+            btnsort.Text = "Sort: Z-A";
+        }
 
         Load += Form_Load;
 
@@ -56,6 +64,23 @@ public partial class DocumentRequestsForm : Form
             "Rejected",
             "Cancelled"
         ]);
+
+        if (cmbfilter != null)
+        {
+            cmbfilter.Items.Clear();
+            cmbfilter.Items.AddRange(
+            [
+                "All Statuses",
+                "Pending",
+                "Processing",
+                "Ready for Release",
+                "Released",
+                "Rejected",
+                "Cancelled"
+            ]);
+
+            cmbfilter.SelectedIndex = 0;
+        }
     }
 
     private GraphicsPath GetRoundedPath(
@@ -208,7 +233,9 @@ public partial class DocumentRequestsForm : Form
         List<Student> students =
             await _students.GetAllAsync();
 
-        cmbStudent.DataSource = students;
+        cmbStudent.DataSource = students
+            .OrderBy(x => x.FullName)
+            .ToList();
 
         cmbStudent.DisplayMember =
             nameof(Student.FullName);
@@ -336,6 +363,101 @@ public partial class DocumentRequestsForm : Form
         }
     }
 
+    private async Task ApplySearchSortAndFilterAsync()
+    {
+        List<DocumentRequest> requests =
+            await _service.GetAllAsync();
+
+        List<Student> students =
+            await _students.GetAllAsync();
+
+        string searchText =
+            txtSearch.Text
+                .Trim()
+                .ToLowerInvariant();
+
+        string selectedStatus =
+            cmbfilter?.SelectedItem?.ToString()
+            ?? "All Statuses";
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            requests = requests
+                .Where(request =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                request.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    string studentName =
+                        matchedStudent?.FullName
+                            ?.ToLowerInvariant()
+                        ?? string.Empty;
+
+                    return
+                        request.RequestId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || request.StudentId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || request.DocumentType
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || request.Status
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || studentName.Contains(searchText);
+                })
+                .ToList();
+        }
+
+        if (!selectedStatus.Equals(
+                "All Statuses",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            requests = requests
+                .Where(request =>
+                    request.Status.Equals(
+                        selectedStatus,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        requests = _sortAscending
+            ? requests
+                .OrderBy(request =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                request.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList()
+            : requests
+                .OrderByDescending(request =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                request.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList();
+
+        dgvDocumentRequests.DataSource = requests;
+        dgvDocumentRequests.ClearSelection();
+    }
+
     private async void btnAdd_Click(
         object? sender,
         EventArgs e)
@@ -358,12 +480,21 @@ public partial class DocumentRequestsForm : Form
                     )
                 );
 
-            await _service.SaveAsync(
-                request
-            );
+            DialogResult addConfirm =
+                MessageBox.Show(
+                    "Save this document request?",
+                    "Confirm Add",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
+            if (addConfirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            await _service.SaveAsync(request);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -412,12 +543,21 @@ public partial class DocumentRequestsForm : Form
                     _selectedRequestId
                 );
 
-            await _service.SaveAsync(
-                request
-            );
+            DialogResult updateConfirm =
+                MessageBox.Show(
+                    "Update this document request?",
+                    "Confirm Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
 
+            if (updateConfirm != DialogResult.Yes)
+            {
+                return;
+            }
+
+            await _service.SaveAsync(request);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -474,7 +614,6 @@ public partial class DocumentRequestsForm : Form
             );
 
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -512,6 +651,18 @@ public partial class DocumentRequestsForm : Form
             await LoadGridAsync();
 
             ClearFields();
+
+            if (cmbfilter != null)
+            {
+                cmbfilter.SelectedIndex = 0;
+            }
+
+            _sortAscending = false;
+
+            if (btnsort != null)
+            {
+                btnsort.Text = "Sort: Z-A";
+            }
         }
         catch (Exception ex)
         {
@@ -530,49 +681,7 @@ public partial class DocumentRequestsForm : Form
     {
         try
         {
-            string searchText =
-                txtSearch.Text
-                    .Trim()
-                    .ToLowerInvariant();
-
-            List<DocumentRequest> requests =
-                await _service.GetAllAsync();
-
-            if (string.IsNullOrWhiteSpace(
-                searchText))
-            {
-                dgvDocumentRequests.DataSource =
-                    requests;
-
-                dgvDocumentRequests
-                    .ClearSelection();
-
-                return;
-            }
-
-            dgvDocumentRequests.DataSource =
-                requests
-                    .Where(request =>
-                        request.RequestId
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-
-                        || request.StudentId
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-
-                        || request.DocumentType
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-
-                        || request.Status
-                            .ToLowerInvariant()
-                            .Contains(searchText)
-                    )
-                    .ToList();
-
-            dgvDocumentRequests
-                .ClearSelection();
+            await ApplySearchSortAndFilterAsync();
         }
         catch (Exception ex)
         {
@@ -590,8 +699,7 @@ public partial class DocumentRequestsForm : Form
         dgvDocumentRequests.DataSource =
             await _service.GetAllAsync();
 
-        dgvDocumentRequests
-            .ClearSelection();
+        dgvDocumentRequests.ClearSelection();
     }
 
     private void dgvDocumentRequests_CellClick(
@@ -652,9 +760,7 @@ public partial class DocumentRequestsForm : Form
             ))
             {
                 dtpReleaseDate.Checked = true;
-
-                dtpReleaseDate.Value =
-                    releaseDate;
+                dtpReleaseDate.Value = releaseDate;
             }
             else
             {
@@ -712,7 +818,6 @@ public partial class DocumentRequestsForm : Form
             _selectedRequestId = null;
 
             cmbStudent.Enabled = true;
-
             cmbStudent.SelectedIndex = -1;
 
             cmbDocumentType.SelectedIndex = -1;
@@ -724,26 +829,16 @@ public partial class DocumentRequestsForm : Form
             txtRemarks.Clear();
             txtSearch.Clear();
 
-            dtpRequestDate.Value =
-                DateTime.Now;
+            dtpRequestDate.Value = DateTime.Now;
 
-            dtpReleaseDate.Checked =
-                false;
+            dtpReleaseDate.Checked = false;
+            dtpReleaseDate.Value = DateTime.Now;
+            dtpReleaseDate.Enabled = false;
 
-            dtpReleaseDate.Value =
-                DateTime.Now;
+            btnUpdate.Enabled = false;
+            btnDelete.Enabled = false;
 
-            dtpReleaseDate.Enabled =
-                false;
-
-            btnUpdate.Enabled =
-                false;
-
-            btnDelete.Enabled =
-                false;
-
-            dgvDocumentRequests
-                .ClearSelection();
+            dgvDocumentRequests.ClearSelection();
         }
         finally
         {
@@ -756,5 +851,26 @@ public partial class DocumentRequestsForm : Form
         EventArgs e)
     {
         Close();
+    }
+
+    private async void cmbfilter_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (_isLoadingRecord)
+        {
+            return;
+        }
+
+        await ApplySearchSortAndFilterAsync();
+    }
+
+    private async void btnsort_Click(object sender, EventArgs e)
+    {
+        _sortAscending = !_sortAscending;
+
+        btnsort.Text = _sortAscending
+            ? "Sort: A-Z"
+            : "Sort: Z-A";
+
+        await ApplySearchSortAndFilterAsync();
     }
 }

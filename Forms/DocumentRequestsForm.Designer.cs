@@ -60,9 +60,9 @@ partial class DocumentRequestsForm
 
     private void InitializeComponent()
     {
-        DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
         pnlHeader = new Panel();
         btnBack = new Button();
         picLogo = new PictureBox();
@@ -94,6 +94,8 @@ partial class DocumentRequestsForm
         btnSearch = new Button();
         dgvDocumentRequests = new DataGridView();
         lblFooter = new Label();
+        btnsort = new Button();
+        cmbfilter = new ComboBox();
         pnlHeader.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
         pnlFormCard.SuspendLayout();
@@ -431,27 +433,27 @@ partial class DocumentRequestsForm
         dgvDocumentRequests.AllowUserToAddRows = false;
         dgvDocumentRequests.AllowUserToDeleteRows = false;
         dgvDocumentRequests.AllowUserToResizeRows = false;
-        dataGridViewCellStyle4.BackColor = Color.FromArgb(248, 248, 248);
-        dgvDocumentRequests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
+        dataGridViewCellStyle7.BackColor = Color.FromArgb(248, 248, 248);
+        dgvDocumentRequests.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle7;
         dgvDocumentRequests.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgvDocumentRequests.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         dgvDocumentRequests.BackgroundColor = Color.White;
         dgvDocumentRequests.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-        dataGridViewCellStyle5.BackColor = Color.FromArgb(128, 0, 24);
-        dataGridViewCellStyle5.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-        dataGridViewCellStyle5.ForeColor = Color.White;
-        dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(128, 0, 24);
-        dataGridViewCellStyle5.SelectionForeColor = Color.White;
-        dgvDocumentRequests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+        dataGridViewCellStyle8.BackColor = Color.FromArgb(128, 0, 24);
+        dataGridViewCellStyle8.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+        dataGridViewCellStyle8.ForeColor = Color.White;
+        dataGridViewCellStyle8.SelectionBackColor = Color.FromArgb(128, 0, 24);
+        dataGridViewCellStyle8.SelectionForeColor = Color.White;
+        dgvDocumentRequests.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle8;
         dgvDocumentRequests.ColumnHeadersHeight = 34;
-        dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle6.BackColor = Color.White;
-        dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
-        dataGridViewCellStyle6.ForeColor = Color.Black;
-        dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(235, 205, 210);
-        dataGridViewCellStyle6.SelectionForeColor = Color.Black;
-        dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
-        dgvDocumentRequests.DefaultCellStyle = dataGridViewCellStyle6;
+        dataGridViewCellStyle9.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle9.BackColor = Color.White;
+        dataGridViewCellStyle9.Font = new Font("Segoe UI", 9F);
+        dataGridViewCellStyle9.ForeColor = Color.Black;
+        dataGridViewCellStyle9.SelectionBackColor = Color.FromArgb(235, 205, 210);
+        dataGridViewCellStyle9.SelectionForeColor = Color.Black;
+        dataGridViewCellStyle9.WrapMode = DataGridViewTriState.False;
+        dgvDocumentRequests.DefaultCellStyle = dataGridViewCellStyle9;
         dgvDocumentRequests.EnableHeadersVisualStyles = false;
         dgvDocumentRequests.GridColor = Color.FromArgb(220, 220, 220);
         dgvDocumentRequests.Location = new Point(28, 480);
@@ -477,12 +479,36 @@ partial class DocumentRequestsForm
         lblFooter.TabIndex = 0;
         lblFooter.Text = "© 2026 Batangas State University";
         // 
+        // btnsort
+        // 
+        btnsort.BackColor = Color.WhiteSmoke;
+        btnsort.Enabled = false;
+        btnsort.FlatStyle = FlatStyle.Flat;
+        btnsort.Font = new Font("Segoe UI Semibold", 10F);
+        btnsort.Location = new Point(830, 350);
+        btnsort.Name = "btnsort";
+        btnsort.Size = new Size(93, 40);
+        btnsort.TabIndex = 14;
+        btnsort.Text = "Sort ";
+        btnsort.UseVisualStyleBackColor = false;
+        // 
+        // cmbfilter
+        // 
+        cmbfilter.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbfilter.Location = new Point(670, 361);
+        cmbfilter.Name = "cmbfilter";
+        cmbfilter.Size = new Size(133, 23);
+        cmbfilter.TabIndex = 15;
+        cmbfilter.SelectedIndexChanged += cmbfilter_SelectedIndexChanged;
+        // 
         // DocumentRequestsForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(245, 245, 245);
         ClientSize = new Size(1180, 720);
+        Controls.Add(cmbfilter);
+        Controls.Add(btnsort);
         Controls.Add(lblFooter);
         Controls.Add(dgvDocumentRequests);
         Controls.Add(pnlSearch);
@@ -509,4 +535,6 @@ partial class DocumentRequestsForm
         ResumeLayout(false);
         PerformLayout();
     }
+    private Button btnsort;
+    private ComboBox cmbfilter;
 }

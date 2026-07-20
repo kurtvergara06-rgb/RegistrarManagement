@@ -63,9 +63,9 @@ partial class StudentRegistrationForm
 
     private void InitializeComponent()
     {
-        DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
-        DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
+        DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
         pnlHeader = new Panel();
         btnBack = new Button();
         picLogo = new PictureBox();
@@ -99,6 +99,8 @@ partial class StudentRegistrationForm
         btnSearch = new Button();
         dgvRegistrations = new DataGridView();
         lblFooter = new Label();
+        btnsort = new Button();
+        cmbfilter = new ComboBox();
         pnlHeader.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
         pnlFormCard.SuspendLayout();
@@ -466,30 +468,30 @@ partial class StudentRegistrationForm
         dgvRegistrations.AllowUserToAddRows = false;
         dgvRegistrations.AllowUserToDeleteRows = false;
         dgvRegistrations.AllowUserToResizeRows = false;
-        dataGridViewCellStyle4.BackColor = Color.FromArgb(248, 248, 248);
-        dgvRegistrations.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle4;
+        dataGridViewCellStyle10.BackColor = Color.FromArgb(248, 248, 248);
+        dgvRegistrations.AlternatingRowsDefaultCellStyle = dataGridViewCellStyle10;
         dgvRegistrations.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         dgvRegistrations.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         dgvRegistrations.BackgroundColor = Color.White;
         dgvRegistrations.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
         dgvRegistrations.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-        dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle5.BackColor = Color.FromArgb(128, 0, 24);
-        dataGridViewCellStyle5.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-        dataGridViewCellStyle5.ForeColor = Color.White;
-        dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(128, 0, 24);
-        dataGridViewCellStyle5.SelectionForeColor = Color.White;
-        dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
-        dgvRegistrations.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle5;
+        dataGridViewCellStyle11.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle11.BackColor = Color.FromArgb(128, 0, 24);
+        dataGridViewCellStyle11.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
+        dataGridViewCellStyle11.ForeColor = Color.White;
+        dataGridViewCellStyle11.SelectionBackColor = Color.FromArgb(128, 0, 24);
+        dataGridViewCellStyle11.SelectionForeColor = Color.White;
+        dataGridViewCellStyle11.WrapMode = DataGridViewTriState.True;
+        dgvRegistrations.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
         dgvRegistrations.ColumnHeadersHeight = 34;
-        dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
-        dataGridViewCellStyle6.BackColor = Color.White;
-        dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F);
-        dataGridViewCellStyle6.ForeColor = Color.Black;
-        dataGridViewCellStyle6.SelectionBackColor = Color.FromArgb(235, 205, 210);
-        dataGridViewCellStyle6.SelectionForeColor = Color.Black;
-        dataGridViewCellStyle6.WrapMode = DataGridViewTriState.False;
-        dgvRegistrations.DefaultCellStyle = dataGridViewCellStyle6;
+        dataGridViewCellStyle12.Alignment = DataGridViewContentAlignment.MiddleLeft;
+        dataGridViewCellStyle12.BackColor = Color.White;
+        dataGridViewCellStyle12.Font = new Font("Segoe UI", 9F);
+        dataGridViewCellStyle12.ForeColor = Color.Black;
+        dataGridViewCellStyle12.SelectionBackColor = Color.FromArgb(235, 205, 210);
+        dataGridViewCellStyle12.SelectionForeColor = Color.Black;
+        dataGridViewCellStyle12.WrapMode = DataGridViewTriState.False;
+        dgvRegistrations.DefaultCellStyle = dataGridViewCellStyle12;
         dgvRegistrations.EnableHeadersVisualStyles = false;
         dgvRegistrations.GridColor = Color.FromArgb(220, 220, 220);
         dgvRegistrations.Location = new Point(28, 480);
@@ -515,12 +517,37 @@ partial class StudentRegistrationForm
         lblFooter.TabIndex = 0;
         lblFooter.Text = "© 2026 Batangas State University";
         // 
+        // btnsort
+        // 
+        btnsort.BackColor = Color.WhiteSmoke;
+        btnsort.Enabled = false;
+        btnsort.FlatStyle = FlatStyle.Flat;
+        btnsort.Font = new Font("Segoe UI Semibold", 10F);
+        btnsort.Location = new Point(843, 350);
+        btnsort.Name = "btnsort";
+        btnsort.Size = new Size(93, 40);
+        btnsort.TabIndex = 15;
+        btnsort.Text = "Sort ";
+        btnsort.UseVisualStyleBackColor = false;
+        btnsort.Click += btnsort_Click;
+        // 
+        // cmbfilter
+        // 
+        cmbfilter.DropDownStyle = ComboBoxStyle.DropDownList;
+        cmbfilter.Location = new Point(687, 361);
+        cmbfilter.Name = "cmbfilter";
+        cmbfilter.Size = new Size(133, 23);
+        cmbfilter.TabIndex = 16;
+        cmbfilter.SelectedIndexChanged += cmbfilter_SelectedIndexChanged;
+        // 
         // StudentRegistrationForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         BackColor = Color.FromArgb(245, 245, 245);
         ClientSize = new Size(1180, 720);
+        Controls.Add(cmbfilter);
+        Controls.Add(btnsort);
         Controls.Add(lblFooter);
         Controls.Add(dgvRegistrations);
         Controls.Add(pnlSearch);
@@ -547,4 +574,6 @@ partial class StudentRegistrationForm
         ResumeLayout(false);
         PerformLayout();
     }
+    private Button btnsort;
+    private ComboBox cmbfilter;
 }

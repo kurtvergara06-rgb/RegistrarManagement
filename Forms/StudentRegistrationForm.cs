@@ -15,13 +15,14 @@ public partial class StudentRegistrationForm : Form
 
     private string? _selectedRegistrationId;
     private bool _isLoadingRecord;
+    private bool _sortAscending = false;
 
     public StudentRegistrationForm()
     {
         InitializeComponent();
 
         Color maroon =
-        Color.FromArgb(128, 0, 24);
+            Color.FromArgb(128, 0, 24);
 
         Color red =
             Color.FromArgb(220, 53, 69);
@@ -65,7 +66,18 @@ public partial class StudentRegistrationForm : Form
             maroon
         );
 
-        // Program comes from the selected student's Firebase record.
+        if (btnsort != null)
+        {
+            SetRoundedButton(
+                btnsort,
+                8,
+                maroon
+            );
+
+            btnsort.Enabled = true;
+            btnsort.Text = "Sort: Z-A";
+        }
+
         cmbProgram.Enabled = false;
 
         Load += Form_Load;
@@ -91,6 +103,21 @@ public partial class StudentRegistrationForm : Form
             "On Hold",
             "Cancelled"
         ]);
+
+        if (cmbfilter != null)
+        {
+            cmbfilter.Items.Clear();
+            cmbfilter.Items.AddRange(
+            [
+                "All Statuses",
+                "Registered",
+                "Pending",
+                "On Hold",
+                "Cancelled"
+            ]);
+
+            cmbfilter.SelectedIndex = 0;
+        }
     }
 
     private async void Form_Load(
@@ -122,7 +149,10 @@ public partial class StudentRegistrationForm : Form
         List<Student> students =
             await _students.GetAllAsync();
 
-        cmbStudent.DataSource = students;
+        cmbStudent.DataSource = students
+            .OrderBy(x => x.FullName)
+            .ToList();
+
         cmbStudent.DisplayMember =
             nameof(Student.FullName);
 
@@ -330,8 +360,8 @@ public partial class StudentRegistrationForm : Form
     }
 
     private GraphicsPath GetRoundedPath(
-    Rectangle rectangle,
-    int radius)
+        Rectangle rectangle,
+        int radius)
     {
         GraphicsPath path = new GraphicsPath();
 
@@ -384,8 +414,6 @@ public partial class StudentRegistrationForm : Form
         Color borderColor)
     {
         button.FlatStyle = FlatStyle.Flat;
-
-        // Remove the normal square WinForms border.
         button.FlatAppearance.BorderSize = 0;
 
         void ApplyRegion()
@@ -496,6 +524,101 @@ public partial class StudentRegistrationForm : Form
             );
     }
 
+    private async Task ApplySearchSortAndFilterAsync()
+    {
+        List<StudentRegistration> records =
+            await _service.GetAllAsync();
+
+        List<Student> students =
+            await _students.GetAllAsync();
+
+        string searchText =
+            txtSearch.Text
+                .Trim()
+                .ToLowerInvariant();
+
+        string selectedStatus =
+            cmbfilter?.SelectedItem?.ToString()
+            ?? "All Statuses";
+
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            records = records
+                .Where(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    string studentName =
+                        matchedStudent?.FullName
+                            ?.ToLowerInvariant()
+                        ?? string.Empty;
+
+                    return
+                        record.RegistrationId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.StudentId
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.SchoolYear
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || record.RegistrationStatus
+                            .ToLowerInvariant()
+                            .Contains(searchText)
+                        || studentName.Contains(searchText);
+                })
+                .ToList();
+        }
+
+        if (!selectedStatus.Equals(
+                "All Statuses",
+                StringComparison.OrdinalIgnoreCase))
+        {
+            records = records
+                .Where(record =>
+                    record.RegistrationStatus.Equals(
+                        selectedStatus,
+                        StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
+        records = _sortAscending
+            ? records
+                .OrderBy(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList()
+            : records
+                .OrderByDescending(record =>
+                {
+                    Student? matchedStudent =
+                        students.FirstOrDefault(student =>
+                            student.StudentId.Equals(
+                                record.StudentId,
+                                StringComparison.OrdinalIgnoreCase));
+
+                    return matchedStudent?.FullName
+                        ?? string.Empty;
+                })
+                .ToList();
+
+        dgvRegistrations.DataSource = records;
+        dgvRegistrations.ClearSelection();
+    }
+
     private async void btnAdd_Click(
         object? sender,
         EventArgs e)
@@ -517,13 +640,13 @@ public partial class StudentRegistrationForm : Form
             List<StudentRegistration> existingRecords =
                 await _service.GetAllAsync();
 
-                        StudentRegistration registration =
-                            BuildRegistration(
-                                IdGenerator.CreateNext(
-                                    "REG",
-                                    existingRecords.Select(x => x.RegistrationId)
-                                )
-                            );
+            StudentRegistration registration =
+                BuildRegistration(
+                    IdGenerator.CreateNext(
+                        "REG",
+                        existingRecords.Select(x => x.RegistrationId)
+                    )
+                );
 
             bool duplicate = existingRecords.Any(record =>
                 record.StudentId ==
@@ -547,9 +670,21 @@ public partial class StudentRegistrationForm : Form
                 return;
             }
 
+            DialogResult addConfirm =
+                MessageBox.Show(
+                    "Save this registration record?",
+                    "Confirm Add",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+            if (addConfirm != DialogResult.Yes)
+            {
+                return;
+            }
+
             await _service.SaveAsync(registration);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -605,9 +740,21 @@ public partial class StudentRegistrationForm : Form
                     _selectedRegistrationId
                 );
 
+            DialogResult updateConfirm =
+                MessageBox.Show(
+                    "Update this registration record?",
+                    "Confirm Update",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question
+                );
+
+            if (updateConfirm != DialogResult.Yes)
+            {
+                return;
+            }
+
             await _service.SaveAsync(registration);
             await LoadGridAsync();
-
             ClearFields();
 
             MessageBox.Show(
@@ -702,6 +849,18 @@ public partial class StudentRegistrationForm : Form
             await LoadGridAsync();
 
             ClearFields();
+
+            if (cmbfilter != null)
+            {
+                cmbfilter.SelectedIndex = 0;
+            }
+
+            _sortAscending = false;
+
+            if (btnsort != null)
+            {
+                btnsort.Text = "Sort: Z-A";
+            }
         }
         catch (Exception ex)
         {
@@ -720,39 +879,7 @@ public partial class StudentRegistrationForm : Form
     {
         try
         {
-            string searchText =
-                txtSearch.Text
-                    .Trim()
-                    .ToLowerInvariant();
-
-            List<StudentRegistration> records =
-                await _service.GetAllAsync();
-
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                dgvRegistrations.DataSource = records;
-                dgvRegistrations.ClearSelection();
-                return;
-            }
-
-            dgvRegistrations.DataSource = records
-                .Where(record =>
-                    record.RegistrationId
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.StudentId
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.SchoolYear
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                    || record.RegistrationStatus
-                        .ToLowerInvariant()
-                        .Contains(searchText)
-                )
-                .ToList();
-
-            dgvRegistrations.ClearSelection();
+            await ApplySearchSortAndFilterAsync();
         }
         catch (Exception ex)
         {
@@ -828,7 +955,6 @@ public partial class StudentRegistrationForm : Form
                     registrationDate;
             }
 
-            // Lock the student while editing.
             cmbStudent.Enabled = false;
 
             btnUpdate.Enabled = true;
@@ -904,7 +1030,6 @@ public partial class StudentRegistrationForm : Form
         {
             _selectedRegistrationId = null;
 
-            // Student becomes selectable again.
             cmbStudent.Enabled = true;
 
             cmbStudent.SelectedIndex = -1;
@@ -950,9 +1075,30 @@ public partial class StudentRegistrationForm : Form
     }
 
     private void btnBack_Click(
-    object? sender,
-    EventArgs e)
+        object? sender,
+        EventArgs e)
     {
         Close();
+    }
+
+    private async void btnsort_Click(object sender, EventArgs e)
+    {
+        _sortAscending = !_sortAscending;
+
+        btnsort.Text = _sortAscending
+            ? "Sort: A-Z"
+            : "Sort: Z-A";
+
+        await ApplySearchSortAndFilterAsync();
+    }
+
+    private async void cmbfilter_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (_isLoadingRecord)
+        {
+            return;
+        }
+
+        await ApplySearchSortAndFilterAsync();
     }
 }

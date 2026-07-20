@@ -10,17 +10,17 @@ namespace RegistrarManagement.Models;
 public class AcademicOffering
 {
     [JsonPropertyName("OfferingID")]
-    public string OfferingId { get; set; } = string.Empty;
+    public string OfferingId { get; set; } = "";
 
     [JsonPropertyName("SchoolYear")]
-    public string SchoolYear { get; set; } = string.Empty;
+    public string SchoolYear { get; set; } = "";
 
     [JsonPropertyName("Semester")]
-    public string Semester { get; set; } = string.Empty;
+    public string Semester { get; set; } = "";
 
     [JsonPropertyName("Status")]
-    public string Status { get; set; } = string.Empty;
+    public string Status { get; set; } = "";
 
     [JsonPropertyName("SubjectCode")]
-    public string SubjectCode { get; set; } = string.Empty;
+    public string SubjectCode { get; set; } = "";
 }

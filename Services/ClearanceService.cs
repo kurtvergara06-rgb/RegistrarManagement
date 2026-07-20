@@ -178,24 +178,26 @@ public class ClearanceService
     // ==========================================
 
     public static string Overall(
-        StudentClearance clearance)
+     StudentClearance clearance)
     {
         string[] statuses =
         {
-            clearance.LibraryStatus,
-            clearance.MedicalStatus,
-            clearance.RegistrarStatus,
-            clearance.AccountingStatus
-        };
+        clearance.LibraryStatus,
+        clearance.MedicalStatus,
+        clearance.RegistrarStatus,
+        clearance.AccountingStatus
+    };
 
-        if (statuses.Any(status =>
+        // 1. If all are cleared
+        if (statuses.All(status =>
                 status.Equals(
-                    "Not Cleared",
+                    "Cleared",
                     StringComparison.OrdinalIgnoreCase)))
         {
-            return "Not Cleared";
+            return "Cleared";
         }
 
+        // 2. If any is still ongoing / pending / no record / blank
         if (statuses.Any(status =>
                 string.IsNullOrWhiteSpace(status) ||
                 status.Equals(
@@ -211,12 +213,13 @@ public class ClearanceService
             return "Pending";
         }
 
-        if (statuses.All(status =>
+        // 3. Only return Not Cleared if there is no ongoing/pending left
+        if (statuses.Any(status =>
                 status.Equals(
-                    "Cleared",
+                    "Not Cleared",
                     StringComparison.OrdinalIgnoreCase)))
         {
-            return "Cleared";
+            return "Not Cleared";
         }
 
         return "Pending";
