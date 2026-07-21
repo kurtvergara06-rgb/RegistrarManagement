@@ -103,6 +103,7 @@ partial class StudentClearancesForm
         dgvClearances = new DataGridView();
         pnlFooter = new Panel();
         lblFooter = new Label();
+        panel1 = new Panel();
         pnlHeader.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)picLogo).BeginInit();
         pnlFormCard.SuspendLayout();
@@ -178,6 +179,7 @@ partial class StudentClearancesForm
         pnlFormCard.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
         pnlFormCard.BackColor = Color.White;
         pnlFormCard.BorderStyle = BorderStyle.FixedSingle;
+        pnlFormCard.Controls.Add(panel1);
         pnlFormCard.Controls.Add(lblStudent);
         pnlFormCard.Controls.Add(cmbStudent);
         pnlFormCard.Controls.Add(btnCheckStatus);
@@ -211,7 +213,7 @@ partial class StudentClearancesForm
         lblStudent.ForeColor = Color.FromArgb(60, 60, 60);
         lblStudent.Location = new Point(25, 18);
         lblStudent.Name = "lblStudent";
-        lblStudent.Size = new Size(45, 15);
+        lblStudent.Size = new Size(52, 15);
         lblStudent.TabIndex = 1;
         lblStudent.Text = "Student";
         // 
@@ -232,7 +234,7 @@ partial class StudentClearancesForm
         btnCheckStatus.FlatStyle = FlatStyle.Flat;
         btnCheckStatus.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         btnCheckStatus.ForeColor = Color.White;
-        btnCheckStatus.Location = new Point(910, 12);
+        btnCheckStatus.Location = new Point(940, 223);
         btnCheckStatus.Name = "btnCheckStatus";
         btnCheckStatus.Size = new Size(275, 32);
         btnCheckStatus.TabIndex = 3;
@@ -405,7 +407,7 @@ partial class StudentClearancesForm
         btnDelete.FlatStyle = FlatStyle.Flat;
         btnDelete.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         btnDelete.ForeColor = Color.FromArgb(220, 53, 69);
-        btnDelete.Location = new Point(255, 203);
+        btnDelete.Location = new Point(1080, 149);
         btnDelete.Name = "btnDelete";
         btnDelete.Size = new Size(105, 32);
         btnDelete.TabIndex = 18;
@@ -420,7 +422,7 @@ partial class StudentClearancesForm
         btnClear.FlatStyle = FlatStyle.Flat;
         btnClear.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         btnClear.ForeColor = Color.FromArgb(128, 0, 24);
-        btnClear.Location = new Point(370, 203);
+        btnClear.Location = new Point(1080, 187);
         btnClear.Name = "btnClear";
         btnClear.Size = new Size(105, 32);
         btnClear.TabIndex = 19;
@@ -435,7 +437,7 @@ partial class StudentClearancesForm
         btnRefresh.FlatStyle = FlatStyle.Flat;
         btnRefresh.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
         btnRefresh.ForeColor = Color.FromArgb(128, 0, 24);
-        btnRefresh.Location = new Point(485, 203);
+        btnRefresh.Location = new Point(251, 203);
         btnRefresh.Name = "btnRefresh";
         btnRefresh.Size = new Size(105, 32);
         btnRefresh.TabIndex = 20;
@@ -461,7 +463,7 @@ partial class StudentClearancesForm
         // cmbfilter
         // 
         cmbfilter.DropDownStyle = ComboBoxStyle.DropDownList;
-        cmbfilter.Location = new Point(730, 18);
+        cmbfilter.Location = new Point(733, 19);
         cmbfilter.Name = "cmbfilter";
         cmbfilter.Size = new Size(133, 23);
         cmbfilter.TabIndex = 3;
@@ -484,7 +486,7 @@ partial class StudentClearancesForm
         btnsort.Enabled = false;
         btnsort.FlatStyle = FlatStyle.Flat;
         btnsort.Font = new Font("Segoe UI Semibold", 10F);
-        btnsort.Location = new Point(631, 14);
+        btnsort.Location = new Point(631, 15);
         btnsort.Name = "btnsort";
         btnsort.Size = new Size(93, 32);
         btnsort.TabIndex = 2;
@@ -576,6 +578,13 @@ partial class StudentClearancesForm
         lblFooter.Text = "(c) 2026 Batangas State University - Registrar Management System";
         lblFooter.TextAlign = ContentAlignment.MiddleCenter;
         // 
+        // panel1
+        // 
+        panel1.Location = new Point(940, 149);
+        panel1.Name = "panel1";
+        panel1.Size = new Size(275, 106);
+        panel1.TabIndex = 21;
+        // 
         // StudentClearancesForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -603,4 +612,5 @@ partial class StudentClearancesForm
         pnlFooter.ResumeLayout(false);
         ResumeLayout(false);
     }
+    private Panel panel1;
 }
